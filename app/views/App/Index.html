@@ -1,0 +1,23 @@
+{{set . "title" "Home"}}
+{{template "header.html" .}}
+
+<header>
+  <div class="grid grid-pad">
+    <div class="hero col-1-1">
+      <h1>It works!</h1>
+    </div>
+  </div>
+</header>
+
+<div class="grid grid-pad">
+  {{.files}}
+  <!--- Loop through the events here and display -->
+</div>
+
+<div class="grid grid-pad">
+  <div class="col-1-1">
+    {{template "flash.html" .}}
+  </div>
+</div>
+
+{{template "footer.html" .}}
