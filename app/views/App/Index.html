@@ -4,13 +4,22 @@
 <header>
   <div class="grid grid-pad">
     <div class="hero col-1-1">
-      <h1>It works!</h1>
+      <h1>Smith Family Photo Library</h1>
     </div>
   </div>
 </header>
 
 <div class="grid grid-pad">
-  {{.files}}
+  <p>Files</p>
+  {{range .files}}
+  <a href='/{{.}}'><img src='/{{.}}' alt='photo' height=100 width=100 /></a>
+  {{end}}
+  
+  <p>Directories</p>
+  {{.directories}}
+
+  <p>Error</p>
+  {{.error}}
   <!--- Loop through the events here and display -->
 </div>
 
