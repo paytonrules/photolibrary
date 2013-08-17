@@ -1,4 +1,4 @@
-{{set . "title" "Home"}}
+{{set . "title" .directory}}
 {{template "header.html" .}}
 
 <header>
@@ -9,18 +9,17 @@
   </div>
 </header>
 
+<h2>{{.directory}}</h2>
+
 <div class="grid grid-pad">
-  <p>Files</p>
   {{range .files}}
-  <a href='/{{.}}'><img src='/{{.}}' alt='photo' height=100 width=100 /></a>
+  <a href='/{{.FullPath}}'><img src='/{{.Thumbnail}}' alt='preview' /></a>
   {{end}}
   
-  <p>Directories</p>
-  {{.directories}}
-
-  <p>Error</p>
-  {{.error}}
-  <!--- Loop through the events here and display -->
+  <p>Events</p>
+  {{range .directories}}
+  <p> <a href="{{url "App.Show" .FullName}}">{{.ShortName}}</a> </p>
+  {{end}}
 </div>
 
 <div class="grid grid-pad">
