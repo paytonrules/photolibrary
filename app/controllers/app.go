@@ -1,12 +1,12 @@
 package controllers
 
 import (
-	//	"github.com/nfnt/resize"
 	"github.com/robfig/revel"
-	//  "image/jpeg"
-	//  "image/png"
+	"github.com/robfig/revel/modules/jobs/app/jobs"
 	"os"
 	"path/filepath"
+	photoJobs "photolibrary/app/jobs"
+	"photolibrary/app/models"
 )
 
 type Directory struct {
@@ -14,23 +14,23 @@ type Directory struct {
 	ShortName string
 }
 
-type Image struct {
-	Thumbnail string
-	FullPath  string
-}
-
 type App struct {
 	*revel.Controller
 }
 
 func thumbnailPathFor(imagePath string) string {
-  return filepath.Dir(imagePath) + "/thumbnails/" + filepath.Base(imagePath)
+	return filepath.Dir(imagePath) + "/.thumbnails/" + filepath.Base(imagePath)
 }
 
-func makeImage(imagePath string) Image {
-  return Image{Thumbnail: thumbnailPathFor(imagePath), FullPath: imagePath}
+func makeImage(imagePath string) models.Image {
+	return models.Image{Thumbnail: thumbnailPathFor(imagePath), FullPath: imagePath}
 }
 
+// .thumbnails is not one of the directories
+// Actually skip all hiddens
+// Show a place holder for images that don't have thumbnails yet
+// Show an error for invalid files (I don't know how to do this thingy)
+// Support .thm and movies
 func (c App) renderDirectory(directory string) revel.Result {
 	allFiles, error := filepath.Glob(directory + "/*")
 	if error != nil {
@@ -38,7 +38,7 @@ func (c App) renderDirectory(directory string) revel.Result {
 	}
 
 	directories := make([]Directory, 0, len(allFiles))
-	files := make([]Image, 0, len(allFiles))
+	images := make([]models.Image, 0, len(allFiles))
 
 	for i := range allFiles {
 		lstat, error := os.Lstat(allFiles[i])
@@ -49,10 +49,14 @@ func (c App) renderDirectory(directory string) revel.Result {
 		if lstat.IsDir() {
 			directories = append(directories, Directory{FullName: allFiles[i], ShortName: filepath.Base(allFiles[i])})
 		} else {
-			files = append(files, makeImage(allFiles[i]))
+			images = append(images, makeImage(allFiles[i]))
 		}
 	}
-	c.RenderArgs["files"] = files
+
+	revel.INFO.Println("GenerateThumbnail")
+	jobs.Now(photoJobs.GenerateThumbnail{Images: images})
+
+	c.RenderArgs["images"] = images
 	c.RenderArgs["directories"] = directories
 	return c.RenderTemplate("App/Show.html")
 }
