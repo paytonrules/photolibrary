@@ -4,5 +4,3 @@ type Image struct {
   Thumbnail string
 	FullPath  string
 }
-
-

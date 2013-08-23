@@ -26,35 +26,49 @@ func makeImage(imagePath string) models.Image {
 	return models.Image{Thumbnail: thumbnailPathFor(imagePath), FullPath: imagePath}
 }
 
-// .thumbnails is not one of the directories
-// Actually skip all hiddens
+func removeHiddenFilesFrom(allFiles []string) []string {
+  filesWithoutHiddenFiles := make([]string, 0, len(allFiles))
+  for _, filename := range allFiles {
+    if filepath.Base(filename)[0] != '.' {
+      filesWithoutHiddenFiles = append(filesWithoutHiddenFiles, filename)
+    }
+  }
+
+  return filesWithoutHiddenFiles
+}
+
+func findEligibleFiles(glob string) ([]string, error) {
+	eligibleFiles, error := filepath.Glob(glob)
+  return removeHiddenFilesFrom(eligibleFiles), error
+}
+
 // Show a place holder for images that don't have thumbnails yet
 // Show an error for invalid files (I don't know how to do this thingy)
 // Support .thm and movies
 func (c App) renderDirectory(directory string) revel.Result {
-	allFiles, error := filepath.Glob(directory + "/*")
-	if error != nil {
-		return c.Render(error)
-	}
+  filesWithoutHiddenFiles, error := findEligibleFiles(directory + "/*")
 
-	directories := make([]Directory, 0, len(allFiles))
-	images := make([]models.Image, 0, len(allFiles))
+  if error != nil {
+    c.Render(error)
+  }
 
-	for i := range allFiles {
-		lstat, error := os.Lstat(allFiles[i])
+	directories := make([]Directory, 0, len(filesWithoutHiddenFiles))
+	images := make([]models.Image, 0, len(filesWithoutHiddenFiles))
+
+	for _, currentFile := range filesWithoutHiddenFiles {
+		lstat, error := os.Lstat(currentFile)
 		if error != nil {
 			return c.Render(error)
 		}
 
 		if lstat.IsDir() {
-			directories = append(directories, Directory{FullName: allFiles[i], ShortName: filepath.Base(allFiles[i])})
+			directories = append(directories, Directory{FullName: currentFile, ShortName: filepath.Base(currentFile)})
 		} else {
-			images = append(images, makeImage(allFiles[i]))
+			images = append(images, makeImage(currentFile))
 		}
 	}
 
-	revel.INFO.Println("GenerateThumbnail")
-	jobs.Now(photoJobs.GenerateThumbnail{Images: images})
+	jobs.Now(photoJobs.GenerateThumbnails{Images: images})
 
 	c.RenderArgs["images"] = images
 	c.RenderArgs["directories"] = directories
