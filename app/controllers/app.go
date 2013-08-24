@@ -5,7 +5,7 @@ import (
 	"github.com/robfig/revel/modules/jobs/app/jobs"
 	"os"
 	"path/filepath"
-	photoJobs "photolibrary/app/jobs"
+	photoJobs "github.com/paytonrules/photolibrary/app/jobs"
   "github.com/paytonrules/image"
 )
 
