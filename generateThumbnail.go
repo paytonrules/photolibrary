@@ -13,6 +13,7 @@ import (
 // Clean up error handling
 func (image Image) GenerateThumbnail() {
 	_, err := os.Lstat(image.Thumbnail)
+  log.Println("generating " + image.FullPath)
 	if err != nil && os.IsNotExist(err) {
 		if strings.Contains(strings.ToUpper(filepath.Ext(image.FullPath)), ".JPG") {
       // touch file at very beginning to reduce duplicate jobs
