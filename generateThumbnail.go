@@ -11,7 +11,7 @@ import (
 
 // Make work with PNG
 // Clean up error handling
-func (image *Image) GenerateThumbnail() {
+func (image Image) GenerateThumbnail() {
 	_, err := os.Lstat(image.Thumbnail)
 	if err != nil && os.IsNotExist(err) {
 		if strings.Contains(strings.ToUpper(filepath.Ext(image.FullPath)), ".JPG") {
