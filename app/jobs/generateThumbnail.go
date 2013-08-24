@@ -6,12 +6,12 @@ import (
 	"image/jpeg"
 	"os"
 	"path/filepath"
-	"photolibrary/app/models"
+  "github.com/paytonrules/image"
 	"strings"
 )
 
 type GenerateThumbnail struct {
-	Image models.Image
+	Image image.Image
 }
 
 // Make work with PNG

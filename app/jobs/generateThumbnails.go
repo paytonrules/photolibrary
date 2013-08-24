@@ -3,11 +3,11 @@ package jobs
 import (
 	"github.com/robfig/revel/modules/jobs/app/jobs"
 	"os"
-	"photolibrary/app/models"
+  "github.com/paytonrules/image"
 )
 
 type GenerateThumbnails struct {
-	Images []models.Image
+	Images []image.Image
 }
 
 func (job GenerateThumbnails) Run() {
