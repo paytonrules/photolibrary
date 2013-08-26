@@ -1,9 +1,13 @@
 package jobs
 
 import (
-	"github.com/robfig/revel/modules/jobs/app/jobs"
-	"os"
-  "github.com/paytonrules/image"
+	"bytes"
+	"encoding/json"
+	"github.com/paytonrules/image"
+	"github.com/robfig/revel"
+	"io"
+	"net/http"
+	"path/filepath"
 )
 
 type GenerateThumbnails struct {
@@ -11,10 +15,25 @@ type GenerateThumbnails struct {
 }
 
 func (job GenerateThumbnails) Run() {
-	for _, image := range job.Images {
-		_, err := os.Lstat(image.Thumbnail)
-		if os.IsNotExist(err) {
-      jobs.Now(GenerateThumbnail{Image: image})
-	  }
-  }
+	thumbnailsWithFullPaths := make([]image.Image, 0, len(job.Images))
+
+	for _, currentImage := range job.Images {
+		imageWithFullPaths := image.Image{}
+		imageWithFullPaths.FullPath, _ = filepath.Abs(currentImage.FullPath)
+		imageWithFullPaths.Thumbnail, _ = filepath.Abs(currentImage.Thumbnail)
+
+		thumbnailsWithFullPaths = append(thumbnailsWithFullPaths, imageWithFullPaths)
+	}
+
+	var body io.Reader
+	imagesJson, err := json.Marshal(thumbnailsWithFullPaths)
+	if err != nil {
+		revel.ERROR.Println(err)
+		return
+	}
+
+	body = bytes.NewBuffer(imagesJson)
+	http.Post("http://localhost:8081/generateThumbnails",
+		"text/json",
+		body)
 }
