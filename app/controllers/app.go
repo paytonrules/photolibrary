@@ -1,12 +1,12 @@
 package controllers
 
 import (
+	"github.com/paytonrules/image"
+	photoJobs "github.com/paytonrules/photolibrary/app/jobs"
 	"github.com/robfig/revel"
 	"github.com/robfig/revel/modules/jobs/app/jobs"
 	"os"
 	"path/filepath"
-	photoJobs "github.com/paytonrules/photolibrary/app/jobs"
-  "github.com/paytonrules/image"
 )
 
 type Directory struct {
