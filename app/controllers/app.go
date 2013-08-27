@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"github.com/paytonrules/image"
+	"github.com/paytonrules/photoLibrary/app/models"
 	photoJobs "github.com/paytonrules/photolibrary/app/jobs"
 	"github.com/robfig/revel"
 	"github.com/robfig/revel/modules/jobs/app/jobs"
@@ -16,6 +17,7 @@ type Directory struct {
 
 type App struct {
 	*revel.Controller
+	Events models.Events
 }
 
 func thumbnailPathFor(imagePath string) string {
@@ -49,7 +51,7 @@ func (c App) renderDirectory(directory string) revel.Result {
 	filesWithoutHiddenFiles, error := findEligibleFiles(directory + "/*")
 
 	if error != nil {
-		c.Render(error)
+		return c.RenderError(error)
 	}
 
 	directories := make([]Directory, 0, len(filesWithoutHiddenFiles))
@@ -58,7 +60,7 @@ func (c App) renderDirectory(directory string) revel.Result {
 	for _, currentFile := range filesWithoutHiddenFiles {
 		lstat, error := os.Lstat(currentFile)
 		if error != nil {
-			return c.Render(error)
+			return c.RenderError(error)
 		}
 
 		if lstat.IsDir() {
@@ -87,6 +89,23 @@ func (c App) renderDirectory(directory string) revel.Result {
 	c.RenderArgs["images"] = imagesWithTemporaryThumbnails
 	c.RenderArgs["directories"] = directories
 	return c.RenderTemplate("App/Show.html")
+	/*
+  // It's not events - events only does the find.
+     A more complicated interaction does the job launching and the thumbnail detection
+	   event, err := c.events.Find(directory)
+
+	   if err != nil {
+	     return c.RenderError(err)
+	   } else {
+	     c.RenderArgs["images"] = event.images
+	     c.RenderArgs["directories"] = event.directories
+	     return c.RenderTemplate("App/Show.html")
+	   }*/
+}
+
+func (c App) init() revel.Result {
+	c.Events = models.FileSystemEvents{}
+	return nil
 }
 
 func (c App) Show(directory string) revel.Result {
@@ -94,6 +113,5 @@ func (c App) Show(directory string) revel.Result {
 }
 
 func (c App) Index() revel.Result {
-	// Convert to a url
 	return c.renderDirectory("public/events")
 }
