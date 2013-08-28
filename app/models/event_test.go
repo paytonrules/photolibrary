@@ -4,10 +4,27 @@ import (
 	"github.com/paytonrules/image"
 	. "launchpad.net/gocheck"
 	"os"
+	"path/filepath"
 )
 
 type EventSuite struct {
 	directory string
+}
+
+func (s *EventSuite) CreateFile(filename string, c *C) {
+	s.directory = c.MkDir()
+	file, err := os.Create(s.directory + "/" + filename)
+	c.Assert(err, IsNil)
+	defer file.Close()
+}
+
+func (s *EventSuite) RelativePathTo(filename string, c *C) string {
+	workingDir, err := os.Getwd()
+	c.Assert(err, IsNil)
+	relativePath, err := filepath.Rel(workingDir, s.directory+"/"+filename)
+	c.Assert(err, IsNil)
+
+	return relativePath
 }
 
 var _ = Suite(&EventSuite{})
@@ -51,22 +68,49 @@ func (s *EventSuite) TestWeKeepTheEvents(c *C) {
 	c.Assert(eventWithTemp.Events[0], Equals, "directory")
 }
 
-func (s *EventSuite) TestweDontReplaceThumbnailsThatExist(c *C) {
-	s.directory = c.MkDir()
-	file, err := os.Create(s.directory + "/test.jpg")
-	c.Assert(err, IsNil)
-	defer file.Close()
-
-  images := make([]image.Image, 0, 1)
-  images = append(images, image.Image{Thumbnail: s.directory + "/test.jpg"}) 
+func (s *EventSuite) TestWeDontReplaceThumbnailsThatExist(c *C) {
+	s.CreateFile("test.jpg", c)
+	images := []image.Image{image.Image{Thumbnail: s.directory + "/test.jpg"}}
 	event := Event{Images: images}
-  eventWithTemp := event.ReplaceMissingThumbnailsWithTemp()
 
-	c.Assert(eventWithTemp.Images[0].Thumbnail, Equals, s.directory + "/test.jpg")
+	eventWithTemp := event.ReplaceMissingThumbnailsWithTemp()
+
+	c.Assert(eventWithTemp.Images[0].Thumbnail, Equals, s.directory+"/test.jpg")
 }
 
-// It doesnt replace if the thumbnail exists
-// It doesnt lose the Event
+func (s *EventSuite) TestConvertRelativePathToFullPathForFullPath(c *C) {
+	s.CreateFile("test.jpg", c)
+	relativePath := s.RelativePathTo("test.jpg", c)
+	images := []image.Image{image.Image{FullPath: relativePath}}
+	event := Event{Images: images}
 
+	eventWithFullPaths := event.ReplaceRelativePathsWithFullPaths()
+
+	c.Assert(eventWithFullPaths.Images[0].FullPath, Equals, s.directory+"/test.jpg")
+}
+
+func (s *EventSuite) TestConvertRelativePathToFullPathForThumbnail(c *C) {
+	s.CreateFile("test.jpg", c)
+	relativePath := s.RelativePathTo("test.jpg", c)
+	images := []image.Image{image.Image{Thumbnail: relativePath}}
+	event := Event{Images: images}
+
+	eventWithFullPaths := event.ReplaceRelativePathsWithFullPaths()
+
+	c.Assert(eventWithFullPaths.Images[0].Thumbnail, Equals, s.directory+"/test.jpg")
+}
+
+func (s *EventSuite) TestConvertDirectoriesAsWell(c *C) {
+	s.directory = c.MkDir()
+	relativePath := s.RelativePathTo("please/", c)
+	event := Event{Events: []string{relativePath}}
+
+	eventWithFullPaths := event.ReplaceRelativePathsWithFullPaths()
+
+  c.Assert(eventWithFullPaths.Events[0], Equals, s.directory + "/please")
+}
+
+// Generating jobs
 // Past this - URL's.  You don't configure the img url or use it yet
-// Full paths and generating jobs
+//  - that happens in the view.  So the two things you needed to configure, you don't test
+// Damn
