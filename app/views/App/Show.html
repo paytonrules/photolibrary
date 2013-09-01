@@ -1,4 +1,4 @@
-{{set . "title" .directory}}
+{{set . "title" .directory.ShortName}}
 {{template "header.html" .}}
 
 <header>
@@ -9,11 +9,12 @@
   </div>
 </header>
 
-<h2>{{.directory}}</h2>
+<h2>{{.directory.ShortName}}</h2>
 
 <div class="grid grid-pad">
+  {{$root_url := .root_url}}
   {{range .images}}
-  <a href='http://localhost:8080/{{.FullPath}}'><img src='http://localhost:8080/{{.Thumbnail}}' alt='preview' /></a>
+  <a href='{{$root_url}}/{{.FullPath}}'><img src='{{$root_url}}/{{.Thumbnail}}' alt='preview' /></a>
   {{end}}
   
   <p>Events</p>
