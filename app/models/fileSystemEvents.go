@@ -50,5 +50,12 @@ func (events FileSystemEvents) Find(directoryName string) (Event, error) {
 			Thumbnail: filepath.Dir(file) + "/.thumbnails/" + filepath.Base(file)})
 	}
 
-	return Event{Images: images, Events: directories}, nil
+	eventDescriptions := make([]EventDescription, 0, len(directories))
+	for _, directory := range directories {
+		eventDescriptions = append(eventDescriptions, EventDescription{
+			FullName:  directory,
+			ShortName: filepath.Base(directory)})
+	}
+
+	return Event{Images: images, Events: eventDescriptions}, nil
 }

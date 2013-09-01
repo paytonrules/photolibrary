@@ -59,13 +59,13 @@ func (s *EventSuite) TestWeKeepTheFullPath(c *C) {
 	c.Assert(eventWithTemp.Images[1].FullPath, Equals, "anotherThing.jpg")
 }
 
-func (s *EventSuite) TestWeKeepTheEvents(c *C) {
+func (s *EventSuite) TestWeKeepTheEventDescriptions(c *C) {
 	event := Event{Images: []image.Image{},
-		Events: []string{"directory"}}
+                 Events : []EventDescription{{FullName: "directory", ShortName: "d"}}}
 	eventWithTemp := event.ReplaceMissingThumbnailsWithTemp()
 
 	c.Assert(eventWithTemp.Events, HasLen, 1)
-	c.Assert(eventWithTemp.Events[0], Equals, "directory")
+	c.Assert(eventWithTemp.Events[0].FullName, Equals, "directory")
 }
 
 func (s *EventSuite) TestWeDontReplaceThumbnailsThatExist(c *C) {
@@ -100,17 +100,18 @@ func (s *EventSuite) TestConvertRelativePathToFullPathForThumbnail(c *C) {
 	c.Assert(eventWithFullPaths.Images[0].Thumbnail, Equals, s.directory+"/test.jpg")
 }
 
-func (s *EventSuite) TestConvertDirectoriesAsWell(c *C) {
+func (s *EventSuite) TestConvertEventFullPathsAsWell(c *C) {
 	s.directory = c.MkDir()
 	relativePath := s.RelativePathTo("please/", c)
-	event := Event{Events: []string{relativePath}}
+  event := Event{Events: []EventDescription{{FullName: relativePath}}}
 
 	eventWithFullPaths := event.ReplaceRelativePathsWithFullPaths()
 
-  c.Assert(eventWithFullPaths.Events[0], Equals, s.directory + "/please")
+  c.Assert(eventWithFullPaths.Events[0].FullName, Equals, s.directory + "/please")
 }
 
 // Generating jobs
 // Past this - URL's.  You don't configure the img url or use it yet
 //  - that happens in the view.  So the two things you needed to configure, you don't test
+// Generating the two types of images
 // Damn

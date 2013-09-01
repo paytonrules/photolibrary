@@ -3,10 +3,7 @@ package controllers
 import (
 	"github.com/paytonrules/image"
 	"github.com/paytonrules/photoLibrary/app/models"
-	photoJobs "github.com/paytonrules/photolibrary/app/jobs"
 	"github.com/robfig/revel"
-	"github.com/robfig/revel/modules/jobs/app/jobs"
-	"os"
 	"path/filepath"
 )
 
@@ -17,7 +14,6 @@ type Directory struct {
 
 type App struct {
 	*revel.Controller
-	Events models.Events
 }
 
 func thumbnailPathFor(imagePath string) string {
@@ -48,64 +44,59 @@ func findEligibleFiles(glob string) ([]string, error) {
 // Show an error for invalid files (I don't know how to do this thingy)
 // Support .thm and movies
 func (c App) renderDirectory(directory string) revel.Result {
-	filesWithoutHiddenFiles, error := findEligibleFiles(directory + "/*")
+	/*
+		filesWithoutHiddenFiles, error := findEligibleFiles(directory + "/*")
 
-	if error != nil {
-		return c.RenderError(error)
-	}
-
-	directories := make([]Directory, 0, len(filesWithoutHiddenFiles))
-	images := make([]image.Image, 0, len(filesWithoutHiddenFiles))
-
-	for _, currentFile := range filesWithoutHiddenFiles {
-		lstat, error := os.Lstat(currentFile)
 		if error != nil {
 			return c.RenderError(error)
 		}
 
-		if lstat.IsDir() {
-			directories = append(directories, Directory{FullName: currentFile, ShortName: filepath.Base(currentFile)})
-		} else {
-			images = append(images, makeImage(currentFile))
+		directories := make([]Directory, 0, len(filesWithoutHiddenFiles))
+		images := make([]image.Image, 0, len(filesWithoutHiddenFiles))
+
+		for _, currentFile := range filesWithoutHiddenFiles {
+			lstat, error := os.Lstat(currentFile)
+			if error != nil {
+				return c.RenderError(error)
+			}
+
+			if lstat.IsDir() {
+				directories = append(directories, Directory{FullName: currentFile, ShortName: filepath.Base(currentFile)})
+			} else {
+				images = append(images, makeImage(currentFile))
+			}
 		}
-	}
 
-	jobs.Now(photoJobs.GenerateThumbnails{Images: images})
+		jobs.Now(photoJobs.GenerateThumbnails{Images: images})
 
-	imagesWithTemporaryThumbnails := make([]image.Image, 0, len(images))
-	for _, currentImage := range images {
-		_, error := os.Lstat(currentImage.Thumbnail)
+		imagesWithTemporaryThumbnails := make([]image.Image, 0, len(images))
+		for _, currentImage := range images {
+			_, error := os.Lstat(currentImage.Thumbnail)
 
-		if os.IsNotExist(error) {
-			// You should use 'images url' or whatever the revel syntax is
-			imagesWithTemporaryThumbnails = append(imagesWithTemporaryThumbnails,
-				*image.NewImage("public/img/thumbnail_being_generated.png", currentImage.FullPath))
-		} else {
-			imagesWithTemporaryThumbnails = append(imagesWithTemporaryThumbnails,
-				*image.CopyImage(currentImage))
+			if os.IsNotExist(error) {
+				// You should use 'images url' or whatever the revel syntax is
+				imagesWithTemporaryThumbnails = append(imagesWithTemporaryThumbnails,
+					*image.NewImage("public/img/thumbnail_being_generated.png", currentImage.FullPath))
+			} else {
+				imagesWithTemporaryThumbnails = append(imagesWithTemporaryThumbnails,
+					*image.CopyImage(currentImage))
+			}
 		}
+
+		c.RenderArgs["images"] = imagesWithTemporaryThumbnails
+		c.RenderArgs["directories"] = directories
+		return c.RenderTemplate("App/Show.html")*/
+	events := models.FileSystemEvents{}
+	event, err := events.Find(directory)
+  revel.INFO.Println(event)
+
+	if err != nil {
+		return c.RenderError(err)
+	} else {
+		c.RenderArgs["images"] = event.Images
+		c.RenderArgs["directories"] = event.Events
+		return c.RenderTemplate("App/Show.html")
 	}
-
-	c.RenderArgs["images"] = imagesWithTemporaryThumbnails
-	c.RenderArgs["directories"] = directories
-	return c.RenderTemplate("App/Show.html")
-	/*
-  // It's not events - events only does the find.
-     A more complicated interaction does the job launching and the thumbnail detection
-	   event, err := c.events.Find(directory)
-
-	   if err != nil {
-	     return c.RenderError(err)
-	   } else {
-	     c.RenderArgs["images"] = event.images
-	     c.RenderArgs["directories"] = event.directories
-	     return c.RenderTemplate("App/Show.html")
-	   }*/
-}
-
-func (c App) init() revel.Result {
-	c.Events = models.FileSystemEvents{}
-	return nil
 }
 
 func (c App) Show(directory string) revel.Result {

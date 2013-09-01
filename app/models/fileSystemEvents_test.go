@@ -70,7 +70,8 @@ func (s *FileSystemEventsSuite) TestIncludingDirectoriesAsEvents(c *C) {
 
 	c.Assert(event.Images, HasLen, 0)
 	c.Assert(event.Events, HasLen, 1)
-	c.Assert(event.Events[0], Equals, s.directory+"/Events")
+	c.Assert(event.Events[0].FullName, Equals, s.directory+"/Events")
+	c.Assert(event.Events[0].ShortName, Equals, "Events")
 }
 
 func (s *FileSystemEventsSuite) TestMakingAPathToEachThumbnail(c *C) {

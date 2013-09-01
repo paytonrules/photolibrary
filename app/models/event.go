@@ -6,9 +6,14 @@ import (
 	"path/filepath"
 )
 
+type EventDescription struct {
+  FullName string
+  ShortName string
+}
+
 type Event struct {
 	Images []image.Image
-	Events []string
+	Events []EventDescription
 }
 
 type mappingFunction func(image.Image) image.Image
@@ -48,11 +53,12 @@ func (e Event) ReplaceRelativePathsWithFullPaths() (newEvent *Event) {
 		return image.Image{FullPath: absPath, Thumbnail: absPathThumbnail}
 	})
 
-  directories := []string{}
-  for _, relativeDirectory := range e.Events {
-    absEvent, _ := filepath.Abs(relativeDirectory)
-    directories = append(directories, absEvent)
+  events := []EventDescription{}
+  for _, event := range e.Events {
+    fullDirectory, _ := filepath.Abs(event.FullName)
+    absEvent := EventDescription{FullName: fullDirectory}
+    events = append(events, absEvent)
   }
 
-  return &Event{Images: imagesWithFullPaths, Events: directories}
+  return &Event{Images: imagesWithFullPaths, Events: events}
 }

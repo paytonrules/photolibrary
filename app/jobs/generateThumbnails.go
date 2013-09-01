@@ -12,6 +12,7 @@ import (
 
 type GenerateThumbnails struct {
 	Images []image.Image
+  Duration int
 }
 
 func (job GenerateThumbnails) Run() {
