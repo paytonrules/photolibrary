@@ -9,8 +9,8 @@ import (
 func init() {
   revel.OnAppStart(func() {
     // Fix don't run on weekends
-    jobs.Schedule("0 0 9 * * 1-5", photoJobs.GenerateThumbnails{Duration: 28800})
-    jobs.Schedule("0 0 0 * * 0,6", photoJobs.GenerateThumbnails{Duration: 21600})
+    thumbnailServerUrl, _ := revel.Config.String("thumbnail_server")
+    jobs.Schedule("@midnight", photoJobs.GenerateThumbnails{ThumbnailServer: thumbnailServerUrl, Duration: 360})
   })
 
 	// Filters is the default set of global filters.

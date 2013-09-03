@@ -3,38 +3,20 @@ package jobs
 import (
 	"bytes"
 	"encoding/json"
-	"github.com/paytonrules/image"
-	"github.com/robfig/revel"
-	"io"
+	"github.com/paytonrules/thumbnailRequest"
 	"net/http"
-	"path/filepath"
 )
 
 type GenerateThumbnails struct {
-	Images []image.Image
-  Duration int
+	Server    string
+	Duration  int
+	Directory string
 }
 
 func (job GenerateThumbnails) Run() {
-	thumbnailsWithFullPaths := make([]image.Image, 0, len(job.Images))
-
-	for _, currentImage := range job.Images {
-		imageWithFullPaths := image.Image{}
-		imageWithFullPaths.FullPath, _ = filepath.Abs(currentImage.FullPath)
-		imageWithFullPaths.Thumbnail, _ = filepath.Abs(currentImage.Thumbnail)
-
-		thumbnailsWithFullPaths = append(thumbnailsWithFullPaths, imageWithFullPaths)
-	}
-
-	var body io.Reader
-	imagesJson, err := json.Marshal(thumbnailsWithFullPaths)
-	if err != nil {
-		revel.ERROR.Println(err)
-		return
-	}
-
-	body = bytes.NewBuffer(imagesJson)
-	http.Post("http://localhost:8081/generateThumbnails",
-		"text/json",
-		body)
+	thumbnailRequest := thumbnailRequest.Request{Directory: job.Directory, Duration: job.Duration}
+	marshaledThumbnailRequest, _ := json.Marshal(thumbnailRequest)
+	body := bytes.NewBuffer(marshaledThumbnailRequest)
+	resp, _ := http.Post(job.Server+"/generateThumbnails", "text/json", body)
+	defer resp.Body.Close()
 }
