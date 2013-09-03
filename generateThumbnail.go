@@ -1,4 +1,4 @@
-package image
+package photolibrary
 
 import (
 	"github.com/nfnt/resize"
