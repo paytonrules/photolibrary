@@ -9,9 +9,6 @@ type App struct {
 	*revel.Controller
 }
 
-// Show a place holder for images that don't have thumbnails yet
-// Show an error for invalid files (I don't know how to do this thingy)
-// Support .thm and movies
 func (c App) renderDirectory(directory string) revel.Result {
   image_url, found := revel.Config.String("image_url")
   if !found {
@@ -19,7 +16,6 @@ func (c App) renderDirectory(directory string) revel.Result {
   }
 	events := models.FileSystemEvents{}
 	event, err := events.Find(directory)
-	revel.INFO.Println(event)
 
 	if err != nil {
 		return c.RenderError(err)
@@ -42,5 +38,4 @@ func (c App) Index() revel.Result {
   } else {
     return c.RenderText("Could not find root directory")
   }
-
 }
