@@ -11,14 +11,14 @@ type EventDescription struct {
 }
 
 type Event struct {
-	Images []Image
+	Images []FileSystemImage
 	Events []EventDescription
 }
 
-type mappingFunction func(Image) Image
+type mappingFunction func(FileSystemImage) FileSystemImage
 
-func (e Event) mapImages(f mappingFunction) []Image {
-	images := make([]Image, 0, len(e.Images))
+func (e Event) mapImages(f mappingFunction) []FileSystemImage {
+	images := make([]FileSystemImage, 0, len(e.Images))
 
 	for _, originalImage := range e.Images {
 		images = append(images, f(originalImage))
@@ -28,15 +28,15 @@ func (e Event) mapImages(f mappingFunction) []Image {
 }
 
 func (e Event) ReplaceMissingThumbnailsWithTemp() (newEvent *Event) {
-	imagesWithTempThumbnail := e.mapImages(func(original Image) Image {
+	imagesWithTempThumbnail := e.mapImages(func(original FileSystemImage) FileSystemImage {
 		_, err := os.Lstat(original.Thumbnail)
 
-		var newImage Image
+		var newImage FileSystemImage
 		if os.IsNotExist(err) {
-			newImage = Image{Thumbnail: "thumbnail_being_generated.jpg",
+			newImage = FileSystemImage{Thumbnail: "thumbnail_being_generated.jpg",
 				FullPath: original.FullPath}
 		} else {
-			newImage = Image{Thumbnail: original.Thumbnail,
+			newImage = FileSystemImage{Thumbnail: original.Thumbnail,
 				FullPath: original.FullPath}
 		}
 		return newImage
@@ -46,10 +46,10 @@ func (e Event) ReplaceMissingThumbnailsWithTemp() (newEvent *Event) {
 }
 
 func (e Event) ReplaceRelativePathsWithFullPaths() (newEvent *Event) {
-	imagesWithFullPaths := e.mapImages(func(original Image) Image {
+	imagesWithFullPaths := e.mapImages(func(original FileSystemImage) FileSystemImage {
 		absPath, _ := filepath.Abs(original.FullPath)
 		absPathThumbnail, _ := filepath.Abs(original.Thumbnail)
-		return Image{FullPath: absPath, Thumbnail: absPathThumbnail}
+		return FileSystemImage{FullPath: absPath, Thumbnail: absPathThumbnail}
 	})
 
 	events := []EventDescription{}
