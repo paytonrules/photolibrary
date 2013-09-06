@@ -13,6 +13,15 @@ type FileSystemImage struct {
 	Thumbnail string
 	FullPath  string
 }
+
+func (image FileSystemImage) GetThumbnail() string {
+  return image.Thumbnail
+}
+
+func (image FileSystemImage) GetFullPath() string {
+  return image.FullPath;
+}
+
 // Make work with PNG
 // Clean up error handling
 func (image FileSystemImage) GenerateThumbnail() {

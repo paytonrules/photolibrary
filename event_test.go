@@ -35,31 +35,31 @@ func (s *EventSuite) TearDownTest(c *C) {
 }
 
 func (s *EventSuite) TestReplacingThumbnailsWithPlaceHolders(c *C) {
-	images := make([]FileSystemImage, 0, 2)
+	images := make([]Image, 0, 2)
 	images = append(images, FileSystemImage{Thumbnail: "mything.jpg"})
 	images = append(images, FileSystemImage{Thumbnail: "anotherThing.jpg"})
 
 	event := Event{Images: images}
 	eventWithTemp := event.ReplaceMissingThumbnailsWithTemp()
 
-	c.Assert(eventWithTemp.Images[0].Thumbnail, Equals, "thumbnail_being_generated.jpg")
-	c.Assert(eventWithTemp.Images[1].Thumbnail, Equals, "thumbnail_being_generated.jpg")
+	c.Assert(eventWithTemp.Images[0].GetThumbnail(), Equals, "thumbnail_being_generated.jpg")
+	c.Assert(eventWithTemp.Images[1].GetThumbnail(), Equals, "thumbnail_being_generated.jpg")
 }
 
 func (s *EventSuite) TestWeKeepTheFullPath(c *C) {
-	images := make([]FileSystemImage, 0, 2)
+	images := make([]Image, 0, 2)
 	images = append(images, FileSystemImage{FullPath: "mything.jpg"})
 	images = append(images, FileSystemImage{FullPath: "anotherThing.jpg"})
 
 	event := Event{Images: images}
 	eventWithTemp := event.ReplaceMissingThumbnailsWithTemp()
 
-	c.Assert(eventWithTemp.Images[0].FullPath, Equals, "mything.jpg")
-	c.Assert(eventWithTemp.Images[1].FullPath, Equals, "anotherThing.jpg")
+	c.Assert(eventWithTemp.Images[0].GetFullPath(), Equals, "mything.jpg")
+	c.Assert(eventWithTemp.Images[1].GetFullPath(), Equals, "anotherThing.jpg")
 }
 
 func (s *EventSuite) TestWeKeepTheEventDescriptions(c *C) {
-	event := Event{Images: []FileSystemImage{},
+	event := Event{Images: []Image{},
 		Events: []EventDescription{{FullName: "directory", ShortName: "d"}}}
 	eventWithTemp := event.ReplaceMissingThumbnailsWithTemp()
 
@@ -69,34 +69,34 @@ func (s *EventSuite) TestWeKeepTheEventDescriptions(c *C) {
 
 func (s *EventSuite) TestWeDontReplaceThumbnailsThatExist(c *C) {
 	s.CreateFile("test.jpg", c)
-	images := []FileSystemImage{FileSystemImage{Thumbnail: s.directory + "/test.jpg"}}
+	images := []Image{FileSystemImage{Thumbnail: s.directory + "/test.jpg"}}
 	event := Event{Images: images}
 
 	eventWithTemp := event.ReplaceMissingThumbnailsWithTemp()
 
-	c.Assert(eventWithTemp.Images[0].Thumbnail, Equals, s.directory+"/test.jpg")
+	c.Assert(eventWithTemp.Images[0].GetThumbnail(), Equals, s.directory+"/test.jpg")
 }
 
 func (s *EventSuite) TestConvertRelativePathToFullPathForFullPath(c *C) {
 	s.CreateFile("test.jpg", c)
 	relativePath := s.RelativePathTo("test.jpg", c)
-	images := []FileSystemImage{FileSystemImage{FullPath: relativePath}}
+	images := []Image{FileSystemImage{FullPath: relativePath}}
 	event := Event{Images: images}
 
 	eventWithFullPaths := event.ReplaceRelativePathsWithFullPaths()
 
-	c.Assert(eventWithFullPaths.Images[0].FullPath, Equals, s.directory+"/test.jpg")
+	c.Assert(eventWithFullPaths.Images[0].GetFullPath(), Equals, s.directory+"/test.jpg")
 }
 
 func (s *EventSuite) TestConvertRelativePathToFullPathForThumbnail(c *C) {
 	s.CreateFile("test.jpg", c)
 	relativePath := s.RelativePathTo("test.jpg", c)
-	images := []FileSystemImage{FileSystemImage{Thumbnail: relativePath}}
+	images := []Image{FileSystemImage{Thumbnail: relativePath}}
 	event := Event{Images: images}
 
 	eventWithFullPaths := event.ReplaceRelativePathsWithFullPaths()
 
-	c.Assert(eventWithFullPaths.Images[0].Thumbnail, Equals, s.directory+"/test.jpg")
+	c.Assert(eventWithFullPaths.Images[0].GetThumbnail(), Equals, s.directory+"/test.jpg")
 }
 
 func (s *EventSuite) TestConvertEventFullPathsAsWell(c *C) {

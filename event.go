@@ -11,14 +11,14 @@ type EventDescription struct {
 }
 
 type Event struct {
-	Images []FileSystemImage
+	Images []Image
 	Events []EventDescription
 }
 
-type mappingFunction func(FileSystemImage) FileSystemImage
+type mappingFunction func(Image) Image
 
-func (e Event) mapImages(f mappingFunction) []FileSystemImage {
-	images := make([]FileSystemImage, 0, len(e.Images))
+func (e Event) mapImages(f mappingFunction) []Image {
+	images := make([]Image, 0, len(e.Images))
 
 	for _, originalImage := range e.Images {
 		images = append(images, f(originalImage))
@@ -28,16 +28,16 @@ func (e Event) mapImages(f mappingFunction) []FileSystemImage {
 }
 
 func (e Event) ReplaceMissingThumbnailsWithTemp() (newEvent *Event) {
-	imagesWithTempThumbnail := e.mapImages(func(original FileSystemImage) FileSystemImage {
-		_, err := os.Lstat(original.Thumbnail)
+	imagesWithTempThumbnail := e.mapImages(func(original Image) Image {
+		_, err := os.Lstat(original.GetThumbnail())
 
 		var newImage FileSystemImage
 		if os.IsNotExist(err) {
 			newImage = FileSystemImage{Thumbnail: "thumbnail_being_generated.jpg",
-				FullPath: original.FullPath}
+				FullPath: original.GetFullPath()}
 		} else {
-			newImage = FileSystemImage{Thumbnail: original.Thumbnail,
-				FullPath: original.FullPath}
+			newImage = FileSystemImage{Thumbnail: original.GetThumbnail(),
+				FullPath: original.GetFullPath()}
 		}
 		return newImage
 	})
@@ -46,9 +46,9 @@ func (e Event) ReplaceMissingThumbnailsWithTemp() (newEvent *Event) {
 }
 
 func (e Event) ReplaceRelativePathsWithFullPaths() (newEvent *Event) {
-	imagesWithFullPaths := e.mapImages(func(original FileSystemImage) FileSystemImage {
-		absPath, _ := filepath.Abs(original.FullPath)
-		absPathThumbnail, _ := filepath.Abs(original.Thumbnail)
+	imagesWithFullPaths := e.mapImages(func(original Image) Image {
+		absPath, _ := filepath.Abs(original.GetFullPath())
+		absPathThumbnail, _ := filepath.Abs(original.GetThumbnail())
 		return FileSystemImage{FullPath: absPath, Thumbnail: absPathThumbnail}
 	})
 

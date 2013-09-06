@@ -37,7 +37,7 @@ func (s *FileSystemEventsSuite) TestADirectoryWithOneImage(c *C) {
 	event, _ := events.Find(s.directory)
 
 	c.Assert(event.Images, HasLen, 1)
-	c.Assert(event.Images[0].FullPath, Equals, s.directory+"/test.jpg")
+	c.Assert(event.Images[0].GetFullPath(), Equals, s.directory+"/test.jpg")
 }
 
 func (s *FileSystemEventsSuite) TestDoesNotIncludeHiddenFiles(c *C) {
@@ -83,6 +83,6 @@ func (s *FileSystemEventsSuite) TestMakingAPathToEachThumbnail(c *C) {
 	events := FileSystemEvents{}
 	event, err := events.Find(s.directory)
 
-	c.Assert(event.Images[0].Thumbnail, Equals, s.directory+"/.thumbnails/silly.jpg")
+	c.Assert(event.Images[0].GetThumbnail(), Equals, s.directory+"/.thumbnails/silly.jpg")
 }
 
