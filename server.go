@@ -1,13 +1,15 @@
 package main
 
 import (
-	"net/http"
-  "encoding/json"
-  "github.com/paytonrules/image"
-  "log"
+  "github.com/gorilla/mux"
 )
 
 func main() {
+  r := mux.NewRouter()
+  r.HandleFunc("/generateThumbnails", GenerateThumbnails)
+}
+
+/*
   http.HandleFunc("/generateThumbnails", func(w http.ResponseWriter, r *http.Request) {
 
     decoder := json.NewDecoder(r.Body)
@@ -24,4 +26,4 @@ func main() {
 	})
 
 	http.ListenAndServe(":8081", nil)
-}
+}*/
