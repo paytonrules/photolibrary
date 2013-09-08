@@ -2,7 +2,6 @@ package photolibrary
 
 import (
 	"github.com/nfnt/resize"
-	"log"
 	"image/jpeg"
 	"os"
 	"path/filepath"
@@ -22,35 +21,30 @@ func (image FileSystemImage) GetFullPath() string {
   return image.FullPath;
 }
 
+func (image FileSystemImage) Clone() Image {
+  return image
+}
+
 // Make work with PNG
 // Clean up error handling
 func (image FileSystemImage) GenerateThumbnail() {
 	_, err := os.Lstat(image.Thumbnail)
-  log.Println("generating " + image.FullPath)
 	if err != nil && os.IsNotExist(err) {
 		if strings.Contains(strings.ToUpper(filepath.Ext(image.FullPath)), ".JPG") {
       // touch file at very beginning to reduce duplicate jobs
       // Still a race condition, but as long as there are no errors I can live with it
       // Open the full image file
-      file, err := os.Open(image.FullPath)
-      if err != nil {
-        log.Println(err)
-      }
+      file, _ := os.Open(image.FullPath)
+      defer file.Close()
 
       // decode jpeg into image.Image
-      img, err := jpeg.Decode(file)
-      if err != nil {
-        log.Println(err)
-      }
-      file.Close()
+      img, _ := jpeg.Decode(file)
 
       // See if there is a thumbnails directory
-      _, err = os.Lstat(filepath.Dir(image.Thumbnail))
+      _, err := os.Lstat(filepath.Dir(image.Thumbnail))
       if err != nil {
         if os.IsNotExist(err) {
           os.Mkdir(filepath.Dir(image.Thumbnail), os.ModeDir|os.ModePerm)
-        } else {
-          log.Println(err)
         }
       }
 
@@ -59,10 +53,7 @@ func (image FileSystemImage) GenerateThumbnail() {
       // and preserve aspect ratio
       m := resize.Resize(200, 0, img, resize.NearestNeighbor)
 
-      out, err := os.Create(image.Thumbnail)
-      if err != nil {
-        log.Println(err)
-      }
+      out, _ := os.Create(image.Thumbnail)
       defer out.Close()
 
       // write new image to file

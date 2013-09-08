@@ -85,4 +85,3 @@ func (s *FileSystemEventsSuite) TestMakingAPathToEachThumbnail(c *C) {
 
 	c.Assert(event.Images[0].GetThumbnail(), Equals, s.directory+"/.thumbnails/silly.jpg")
 }
-

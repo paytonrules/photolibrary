@@ -31,13 +31,12 @@ func (e Event) ReplaceMissingThumbnailsWithTemp() (newEvent *Event) {
 	imagesWithTempThumbnail := e.mapImages(func(original Image) Image {
 		_, err := os.Lstat(original.GetThumbnail())
 
-		var newImage FileSystemImage
+		var newImage Image
 		if os.IsNotExist(err) {
 			newImage = FileSystemImage{Thumbnail: "thumbnail_being_generated.jpg",
 				FullPath: original.GetFullPath()}
 		} else {
-			newImage = FileSystemImage{Thumbnail: original.GetThumbnail(),
-				FullPath: original.GetFullPath()}
+			newImage = original.Clone()
 		}
 		return newImage
 	})
