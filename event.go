@@ -33,7 +33,7 @@ func (e Event) ReplaceMissingThumbnailsWithTemp() (newEvent *Event) {
 
 		var newImage Image
 		if os.IsNotExist(err) {
-			newImage = FileSystemImage{Thumbnail: "thumbnail_being_generated.jpg",
+			newImage = &FileSystemImage{Thumbnail: "thumbnail_being_generated.jpg",
 				FullPath: original.GetFullPath()}
 		} else {
 			newImage = original.Clone()
@@ -48,7 +48,7 @@ func (e Event) ReplaceRelativePathsWithFullPaths() (newEvent *Event) {
 	imagesWithFullPaths := e.mapImages(func(original Image) Image {
 		absPath, _ := filepath.Abs(original.GetFullPath())
 		absPathThumbnail, _ := filepath.Abs(original.GetThumbnail())
-		return FileSystemImage{FullPath: absPath, Thumbnail: absPathThumbnail}
+		return &FileSystemImage{FullPath: absPath, Thumbnail: absPathThumbnail}
 	})
 
 	events := []EventDescription{}

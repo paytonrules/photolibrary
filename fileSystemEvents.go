@@ -45,7 +45,7 @@ func (events FileSystemEvents) Find(directoryName string) (Event, error) {
 
 	images := make([]Image, 0, len(fileNames))
 	for _, file := range fileNames {
-		images = append(images, FileSystemImage{FullPath: file,
+		images = append(images, &FileSystemImage{FullPath: file,
 			Thumbnail: filepath.Dir(file) + "/.thumbnails/" + filepath.Base(file)})
 	}
 

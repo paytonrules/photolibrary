@@ -13,7 +13,7 @@ type FileSystemImage struct {
 	FullPath  string
 }
 
-func (image FileSystemImage) GetThumbnail() string {
+func (image *FileSystemImage) GetThumbnail() string {
   return image.Thumbnail
 }
 
@@ -22,7 +22,7 @@ func (image FileSystemImage) GetFullPath() string {
 }
 
 func (image FileSystemImage) Clone() Image {
-  return image
+  return &image
 }
 
 // Make work with PNG

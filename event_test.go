@@ -36,8 +36,8 @@ func (s *EventSuite) TearDownTest(c *C) {
 
 func (s *EventSuite) TestReplacingThumbnailsWithPlaceHolders(c *C) {
 	images := make([]Image, 0, 2)
-	images = append(images, FileSystemImage{Thumbnail: "mything.jpg"})
-	images = append(images, FileSystemImage{Thumbnail: "anotherThing.jpg"})
+	images = append(images, &FileSystemImage{Thumbnail: "mything.jpg"})
+	images = append(images, &FileSystemImage{Thumbnail: "anotherThing.jpg"})
 
 	event := Event{Images: images}
 	eventWithTemp := event.ReplaceMissingThumbnailsWithTemp()
@@ -48,8 +48,8 @@ func (s *EventSuite) TestReplacingThumbnailsWithPlaceHolders(c *C) {
 
 func (s *EventSuite) TestWeKeepTheFullPath(c *C) {
 	images := make([]Image, 0, 2)
-	images = append(images, FileSystemImage{FullPath: "mything.jpg"})
-	images = append(images, FileSystemImage{FullPath: "anotherThing.jpg"})
+	images = append(images, &FileSystemImage{FullPath: "mything.jpg"})
+	images = append(images, &FileSystemImage{FullPath: "anotherThing.jpg"})
 
 	event := Event{Images: images}
 	eventWithTemp := event.ReplaceMissingThumbnailsWithTemp()
@@ -69,7 +69,7 @@ func (s *EventSuite) TestWeKeepTheEventDescriptions(c *C) {
 
 func (s *EventSuite) TestWeDontReplaceThumbnailsThatExist(c *C) {
 	s.CreateFile("test.jpg", c)
-	images := []Image{FileSystemImage{Thumbnail: s.directory + "/test.jpg"}}
+	images := []Image{&FileSystemImage{Thumbnail: s.directory + "/test.jpg"}}
 	event := Event{Images: images}
 
 	eventWithTemp := event.ReplaceMissingThumbnailsWithTemp()
@@ -80,7 +80,7 @@ func (s *EventSuite) TestWeDontReplaceThumbnailsThatExist(c *C) {
 func (s *EventSuite) TestConvertRelativePathToFullPathForFullPath(c *C) {
 	s.CreateFile("test.jpg", c)
 	relativePath := s.RelativePathTo("test.jpg", c)
-	images := []Image{FileSystemImage{FullPath: relativePath}}
+	images := []Image{&FileSystemImage{FullPath: relativePath}}
 	event := Event{Images: images}
 
 	eventWithFullPaths := event.ReplaceRelativePathsWithFullPaths()
@@ -91,7 +91,7 @@ func (s *EventSuite) TestConvertRelativePathToFullPathForFullPath(c *C) {
 func (s *EventSuite) TestConvertRelativePathToFullPathForThumbnail(c *C) {
 	s.CreateFile("test.jpg", c)
 	relativePath := s.RelativePathTo("test.jpg", c)
-	images := []Image{FileSystemImage{Thumbnail: relativePath}}
+	images := []Image{&FileSystemImage{Thumbnail: relativePath}}
 	event := Event{Images: images}
 
 	eventWithFullPaths := event.ReplaceRelativePathsWithFullPaths()
