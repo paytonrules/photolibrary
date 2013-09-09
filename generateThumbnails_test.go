@@ -84,7 +84,7 @@ func (s *GenerateThumbnailsSuite) TestGeneratesThumbnailImages(c *C) {
 	phonyEvents.FindResultFor("directory", photolibrary.Event{Images: []photolibrary.Image{image}})
 	command := GenerateThumbnailsCommand{Events: &phonyEvents}
 
-	req := s.marshalThumbnailRequest("directory", 0)
+	req := s.marshalThumbnailRequest("directory", 200)
 	command.Execute(req)
 
 	c.Assert(image.Generated, Equals, true)
@@ -101,8 +101,39 @@ func (s *GenerateThumbnailsSuite) TestGeneratesThumnailImagesForChildEvents(c *C
 	phonyEvents.FindResultFor("full name", childEvent)
 
 	command := GenerateThumbnailsCommand{Events: &phonyEvents}
-	req := s.marshalThumbnailRequest("Root", 0)
+	req := s.marshalThumbnailRequest("Root", 200)
 	command.Execute(req)
 
 	c.Assert(childImage.Generated, Equals, true)
 }
+
+func (s *GenerateThumbnailsSuite) TestDoesntGenerateThumbnailsAfterDuration(c *C) {
+	phonyEvents := PhonyEvents{}
+	image := &PhonyImage{}
+	phonyEvents.FindResultFor("directory", photolibrary.Event{Images: []photolibrary.Image{image}})
+	command := GenerateThumbnailsCommand{Events: &phonyEvents}
+
+	req := s.marshalThumbnailRequest("directory", 0)
+	command.Execute(req)
+
+	c.Assert(image.Generated, Equals, false)
+}
+
+func (s *GenerateThumbnailsSuite) TestItDoesntContinueDownTheEventTreePastTheDuration(c *C) {
+	phonyEvents := PhonyEvents{}
+	eventDescription := photolibrary.EventDescription{FullName: "full name"}
+	rootEvent := photolibrary.Event{Events: []photolibrary.EventDescription{eventDescription}}
+	childImage := &PhonyImage{}
+	childEvent := photolibrary.Event{Images: []photolibrary.Image{childImage}}
+
+	phonyEvents.FindResultFor("Root", rootEvent)
+	phonyEvents.FindResultFor("full name", childEvent)
+
+	command := GenerateThumbnailsCommand{Events: &phonyEvents}
+	req := s.marshalThumbnailRequest("Root", 0)
+	command.Execute(req)
+
+	c.Assert(childImage.Generated, Equals, false)
+}
+
+
