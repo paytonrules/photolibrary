@@ -11,18 +11,25 @@ type GenerateThumbnailsCommand struct {
 	Events photolibrary.Events
 }
 
+func (c *GenerateThumbnailsCommand) generateThumbnailsForDirectory(directory string) {
+  event, _ := c.Events.Find(directory)
+
+  for _, img := range event.Images {
+    img.GenerateThumbnail()
+  }
+
+  for _, childEvent := range event.Events {
+    c.generateThumbnailsForDirectory(childEvent.FullName)
+  }
+}
+
 func (c *GenerateThumbnailsCommand) Execute(r *http.Request) {
 	decoder := json.NewDecoder(r.Body)
 	var request thumbnailRequest.Request
 	decoder.Decode(&request)
 
-  event, _ := c.Events.Find(request.Directory)
-
-  for _, img := range event.Images {
-    img.GenerateThumbnail()
-  }
+  c.generateThumbnailsForDirectory(request.Directory)
 }
-
 // Decode JSON
 // Loop through every image
   // - generate image

@@ -17,60 +17,92 @@ type GenerateThumbnailsSuite struct{}
 var _ = Suite(&GenerateThumbnailsSuite{})
 
 type PhonyEvents struct {
-	FindString string
-	FindResult photolibrary.Event
-}
-
-type PhonyImage struct {
-  FullPath string
-  Thumbnail string
-  Generated bool
-}
-
-func (img *PhonyImage) GenerateThumbnail() {
-  img.Generated = true
-}
-
-func (img PhonyImage) GetFullPath() string {
-  return img.FullPath
-}
-
-func (img PhonyImage) GetThumbnail() string {
-  return img.Thumbnail
+	FullPaths   bool
+	FindString  string
+	FindResults map[string]photolibrary.Event
 }
 
 func (evts *PhonyEvents) Find(eventName string) (photolibrary.Event, error) {
 	evts.FindString = eventName
-	return evts.FindResult, nil
+	if evts.FindResults != nil {
+		return evts.FindResults[eventName], nil
+	} else {
+		return photolibrary.Event{}, nil
+	}
+}
+
+func (evts *PhonyEvents) FindResultFor(eventName string, evt photolibrary.Event) {
+	if evts.FindResults == nil {
+		evts.FindResults = make(map[string]photolibrary.Event)
+	}
+	evts.FindResults[eventName] = evt
+}
+
+type PhonyImage struct {
+	FullPath  string
+	Thumbnail string
+	Generated bool
+}
+
+func (img *PhonyImage) GenerateThumbnail() {
+	img.Generated = true
+}
+
+func (img PhonyImage) GetFullPath() string {
+	return img.FullPath
+}
+
+func (img PhonyImage) GetThumbnail() string {
+	return img.Thumbnail
+}
+
+func (img PhonyImage) Clone() photolibrary.Image {
+	return nil
+}
+
+func (s *GenerateThumbnailsSuite) marshalThumbnailRequest(directory string, duration int) *http.Request {
+	thumbnailRequest := thumbnailRequest.Request{Directory: directory, Duration: duration}
+	marshaledThumbnailRequest, _ := json.Marshal(thumbnailRequest)
+	body := bytes.NewBuffer(marshaledThumbnailRequest)
+	req, _ := http.NewRequest("dont", "care", body)
+	return req
 }
 
 func (s *GenerateThumbnailsSuite) TestExecuteFindsTheEventsWithTheRightRoot(c *C) {
 	phonyEvent := PhonyEvents{}
 	command := GenerateThumbnailsCommand{Events: &phonyEvent}
 
-	thumbnailRequest := thumbnailRequest.Request{Directory: "directory", Duration: 0}
-
-	marshaledThumbnailRequest, _ := json.Marshal(thumbnailRequest)
-	body := bytes.NewBuffer(marshaledThumbnailRequest)
-	req, _ := http.NewRequest("dont", "care", body)
-
+	req := s.marshalThumbnailRequest("directory", 0)
 	command.Execute(req)
 
 	c.Assert(phonyEvent.FindString, Equals, "directory")
 }
 
-func (s *GenerateThumbnailsSuite) TestGenerateThumbnailOnEachImage(c *C) {
-  image := &PhonyImage{}
-  images := []photolibrary.Image{image}
-  phonyEvents := &PhonyEvents{FindResult: photolibrary.Event{Images:images}}
-	command := GenerateThumbnailsCommand{Events: phonyEvents}
+func (s *GenerateThumbnailsSuite) TestGeneratesThumbnailImages(c *C) {
+	phonyEvents := PhonyEvents{}
+	image := &PhonyImage{}
+	phonyEvents.FindResultFor("directory", photolibrary.Event{Images: []photolibrary.Image{image}})
+	command := GenerateThumbnailsCommand{Events: &phonyEvents}
 
-	thumbnailRequest := thumbnailRequest.Request{Directory: "directory", Duration: 0}
-	marshaledThumbnailRequest, _ := json.Marshal(thumbnailRequest)
-	body := bytes.NewBuffer(marshaledThumbnailRequest)
-	req, _ := http.NewRequest("dont", "care", body)
-
+	req := s.marshalThumbnailRequest("directory", 0)
 	command.Execute(req)
 
-  c.Assert(image.Generated, Equals, true)
+	c.Assert(image.Generated, Equals, true)
+}
+
+func (s *GenerateThumbnailsSuite) TestGeneratesThumnailImagesForChildEvents(c *C) {
+	phonyEvents := PhonyEvents{}
+	eventDescription := photolibrary.EventDescription{FullName: "full name"}
+	rootEvent := photolibrary.Event{Events: []photolibrary.EventDescription{eventDescription}}
+	childImage := &PhonyImage{}
+	childEvent := photolibrary.Event{Images: []photolibrary.Image{childImage}}
+
+	phonyEvents.FindResultFor("Root", rootEvent)
+	phonyEvents.FindResultFor("full name", childEvent)
+
+	command := GenerateThumbnailsCommand{Events: &phonyEvents}
+	req := s.marshalThumbnailRequest("Root", 0)
+	command.Execute(req)
+
+	c.Assert(childImage.Generated, Equals, true)
 }
