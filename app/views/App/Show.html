@@ -14,7 +14,7 @@
 <div class="grid grid-pad">
   {{$root_url := .root_url}}
   {{range .images}}
-  <a href='{{$root_url}}/{{.FullPath}}'><img src='{{$root_url}}/{{.Thumbnail}}' alt='preview' /></a>
+  <a href='{{$root_url}}/{{.GetFullPath}}'><img src='{{$root_url}}/{{.GetThumbnail}}' alt='preview' /></a>
   {{end}}
   
   <p>Events</p>
