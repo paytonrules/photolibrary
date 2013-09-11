@@ -135,5 +135,3 @@ func (s *GenerateThumbnailsSuite) TestItDoesntContinueDownTheEventTreePastTheDur
 
 	c.Assert(childImage.Generated, Equals, false)
 }
-
-
