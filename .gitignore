@@ -1,5 +1,5 @@
-test-results/
-tmp/
-routes/
-public/events
+website/test-results/
+website/tmp/
+website/routes/
+website/public/events
 .DS_Store
