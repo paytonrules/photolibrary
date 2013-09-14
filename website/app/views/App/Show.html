@@ -1,0 +1,32 @@
+{{set . "title" .directory.ShortName}}
+{{template "header.html" .}}
+
+<header>
+  <div class="grid grid-pad">
+    <div class="hero col-1-1">
+      <h1>Smith Family Photo Library</h1>
+    </div>
+  </div>
+</header>
+
+<h2>{{.directory.ShortName}}</h2>
+
+<div class="grid grid-pad">
+  {{$root_url := .root_url}}
+  {{range .images}}
+  <a href='{{$root_url}}/{{.GetFullPath}}'><img src='{{$root_url}}/{{.GetThumbnail}}' alt='preview' /></a>
+  {{end}}
+  
+  <p>Events</p>
+  {{range .directories}}
+  <p> <a href="{{url "App.Show" .FullName}}">{{.ShortName}}</a> </p>
+  {{end}}
+</div>
+
+<div class="grid grid-pad">
+  <div class="col-1-1">
+    {{template "flash.html" .}}
+  </div>
+</div>
+
+{{template "footer.html" .}}
