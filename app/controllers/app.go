@@ -17,12 +17,16 @@ func (c App) renderDirectory(directory string) revel.Result {
 	events := photolibrary.FileSystemEvents{}
 	event, err := events.Find(directory)
 
+  rootDir, _ := revel.Config.String("root_dir")
+  eventWithThumbnails := event.ReplaceMissingThumbnailsWithTemp()
+  relativeEvents := eventWithThumbnails.ImagesRelativeTo(rootDir)
+
 	if err != nil {
 		return c.RenderError(err)
 	} else {
     c.RenderArgs["root_url"] = image_url
-		c.RenderArgs["images"] = event.Images
-		c.RenderArgs["directories"] = event.Events
+		c.RenderArgs["images"] = relativeEvents.Images
+		c.RenderArgs["directories"] = relativeEvents.Events
 		return c.RenderTemplate("App/Show.html")
 	}
 }
