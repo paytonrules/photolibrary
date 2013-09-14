@@ -6,6 +6,15 @@ import (
 )
 
 type FileSystemEvents struct {
+  supportedFiles map[string]bool
+}
+
+func MakeFileSystemEvents(SupportedFiles []string) FileSystemEvents {
+  events := FileSystemEvents{supportedFiles:map[string]bool {}}
+  for _, supportedFileExt := range SupportedFiles {
+    events.supportedFiles[supportedFileExt] = true
+  }
+  return events
 }
 
 func filterOutHiddenFiles(glob []string) []string {
@@ -19,6 +28,16 @@ func filterOutHiddenFiles(glob []string) []string {
 	return filenames
 }
 
+func (evts FileSystemEvents) filterOutUnsupportedFiles(glob []string) []string {
+	filenames := []string{}
+	for _, filename := range glob {
+		if evts.supportedFiles[filepath.Ext(filename)] {
+			filenames = append(filenames, filename)
+		}
+	}
+
+	return filenames
+}
 func separateOutDirectories(glob []string) ([]string, []string) {
 	filenames := make([]string, 0, len(glob))
 	directories := make([]string, 0, len(glob))
@@ -42,6 +61,7 @@ func (events FileSystemEvents) Find(directoryName string) (Event, error) {
 	}
 	fileNames = filterOutHiddenFiles(fileNames)
 	fileNames, directories := separateOutDirectories(fileNames)
+  fileNames = events.filterOutUnsupportedFiles(fileNames)
 
 	images := make([]Image, 0, len(fileNames))
 	for _, file := range fileNames {

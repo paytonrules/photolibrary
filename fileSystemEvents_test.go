@@ -19,7 +19,7 @@ func (s *FileSystemEventsSuite) TearDownTest(c *C) {
 
 func (s *FileSystemEventsSuite) TestAnEmptyDirectory(c *C) {
 	s.directory = c.MkDir()
-	events := FileSystemEvents{}
+	events := MakeFileSystemEvents([]string{})
 
 	event, err := events.Find(s.directory)
 
@@ -33,7 +33,7 @@ func (s *FileSystemEventsSuite) TestADirectoryWithOneImage(c *C) {
 	c.Assert(err, IsNil)
 	defer file.Close()
 
-	events := FileSystemEvents{}
+  events := MakeFileSystemEvents([]string {".jpg"})
 	event, _ := events.Find(s.directory)
 
 	c.Assert(event.Images, HasLen, 1)
@@ -46,14 +46,14 @@ func (s *FileSystemEventsSuite) TestDoesNotIncludeHiddenFiles(c *C) {
 	c.Assert(err, IsNil)
 	defer file.Close()
 
-	events := FileSystemEvents{}
+	events := MakeFileSystemEvents([]string {})
 	event, _ := events.Find(s.directory)
 
 	c.Assert(event.Images, HasLen, 0)
 }
 
 func (s *FileSystemEventsSuite) TestReturnsAnErrorFromABadDirectory(c *C) {
-	events := FileSystemEvents{}
+	events := MakeFileSystemEvents([]string{})
 	_, err := events.Find("[]")
 
 	// syntax error in pattern
@@ -65,7 +65,7 @@ func (s *FileSystemEventsSuite) TestIncludingDirectoriesAsEvents(c *C) {
 	err := os.Mkdir(s.directory+"/Events", 0755)
 	c.Assert(err, IsNil)
 
-	events := FileSystemEvents{}
+	events := MakeFileSystemEvents([]string{})
 	event, err := events.Find(s.directory)
 
 	c.Assert(event.Images, HasLen, 0)
@@ -80,8 +80,21 @@ func (s *FileSystemEventsSuite) TestMakingAPathToEachThumbnail(c *C) {
 	c.Assert(err, IsNil)
 	defer file.Close()
 
-	events := FileSystemEvents{}
+	events := MakeFileSystemEvents([]string{".jpg"})
 	event, err := events.Find(s.directory)
 
 	c.Assert(event.Images[0].GetThumbnail(), Equals, s.directory+"/.thumbnails/silly.jpg")
 }
+
+func (s *FileSystemEventsSuite) TestExcludingUnsupporetedFiles(c *C) {
+	s.directory = c.MkDir()
+	file, err := os.Create(s.directory + "/silly.mov")
+	c.Assert(err, IsNil)
+	defer file.Close()
+
+	events := MakeFileSystemEvents([]string{".jpg"})
+	event, err := events.Find(s.directory)
+
+  c.Assert(event.Images, HasLen, 0)
+}
+
