@@ -3,7 +3,7 @@ package jobs
 import (
 	"bytes"
 	"encoding/json"
-	"github.com/paytonrules/thumbnailRequest"
+	"github.com/paytonrules/photolibrary/thumbnailrequest"
 	"net/http"
 )
 
@@ -14,7 +14,7 @@ type GenerateThumbnails struct {
 }
 
 func (job GenerateThumbnails) Run() {
-	thumbnailRequest := thumbnailRequest.Request{Directory: job.Directory, Duration: job.Duration}
+	thumbnailRequest := thumbnailrequest.Request{Directory: job.Directory, Duration: job.Duration}
 	marshaledThumbnailRequest, _ := json.Marshal(thumbnailRequest)
 	body := bytes.NewBuffer(marshaledThumbnailRequest)
 	resp, _ := http.Post(job.Server+"/generateThumbnails", "text/json", body)
