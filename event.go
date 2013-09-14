@@ -33,7 +33,7 @@ func (e Event) ReplaceMissingThumbnailsWithTemp() (newEvent *Event) {
 
 		var newImage Image
 		if os.IsNotExist(err) {
-			newImage = &FileSystemImage{Thumbnail: "thumbnail_being_generated.jpg",
+			newImage = &FileSystemImage{Thumbnail: "thumbnail_being_generated.png",
 				FullPath: original.GetFullPath()}
 		} else {
 			newImage = original.Clone()
@@ -44,7 +44,7 @@ func (e Event) ReplaceMissingThumbnailsWithTemp() (newEvent *Event) {
 	return &Event{Images: imagesWithTempThumbnail, Events: e.Events}
 }
 
-func (e Event) ReplaceRelativePathsWithFullPaths() (newEvent *Event) {
+func (e Event) ReplaceRelativePathsWithFullPaths() *Event {
 	imagesWithFullPaths := e.mapImages(func(original Image) Image {
 		absPath, _ := filepath.Abs(original.GetFullPath())
 		absPathThumbnail, _ := filepath.Abs(original.GetThumbnail())
@@ -59,4 +59,14 @@ func (e Event) ReplaceRelativePathsWithFullPaths() (newEvent *Event) {
 	}
 
 	return &Event{Images: imagesWithFullPaths, Events: events}
+}
+
+func (e Event) ImagesRelativeTo(root string) *Event {
+  imagesWithRelativePaths := e.mapImages(func(original Image) Image {
+		relPath, _ := filepath.Rel(root, original.GetFullPath())
+		relPathThumbnail, _ := filepath.Rel(root, original.GetThumbnail())
+		return &FileSystemImage{FullPath: relPath, Thumbnail: relPathThumbnail}
+  });
+
+  return &Event{Images: imagesWithRelativePaths, Events: e.Events}
 }

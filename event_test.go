@@ -42,8 +42,8 @@ func (s *EventSuite) TestReplacingThumbnailsWithPlaceHolders(c *C) {
 	event := Event{Images: images}
 	eventWithTemp := event.ReplaceMissingThumbnailsWithTemp()
 
-	c.Assert(eventWithTemp.Images[0].GetThumbnail(), Equals, "thumbnail_being_generated.jpg")
-	c.Assert(eventWithTemp.Images[1].GetThumbnail(), Equals, "thumbnail_being_generated.jpg")
+	c.Assert(eventWithTemp.Images[0].GetThumbnail(), Equals, "thumbnail_being_generated.png")
+	c.Assert(eventWithTemp.Images[1].GetThumbnail(), Equals, "thumbnail_being_generated.png")
 }
 
 func (s *EventSuite) TestWeKeepTheFullPath(c *C) {
@@ -109,8 +109,25 @@ func (s *EventSuite) TestConvertEventFullPathsAsWell(c *C) {
 	c.Assert(eventWithFullPaths.Events[0].FullName, Equals, s.directory+"/please")
 }
 
-// Generating jobs
-// Past this - URL's.  You don't configure the img url or use it yet
-//  - that happens in the view.  So the two things you needed to configure, you don't test
-// Generating the two types of images
-// Damn
+func (s *EventSuite) TestConvertEventToRelativePath(c *C) {
+	s.CreateFile("test.jpg", c)
+	images := []Image{&FileSystemImage{FullPath: s.directory + "/test.jpg", Thumbnail: s.directory + "/test.jpg"}}
+	event := Event{Images: images}
+
+	eventWithSpecialPaths := event.ImagesRelativeTo(s.directory)
+
+	c.Assert(eventWithSpecialPaths.Images[0].GetThumbnail(), Equals, "test.jpg")
+	c.Assert(eventWithSpecialPaths.Images[0].GetFullPath(), Equals, "test.jpg")
+}
+
+func (s *EventSuite) TestConvertingToRelativePathsLeavesEventsUnchanged(c *C) {
+	s.CreateFile("test.jpg", c)
+	fullPath := s.directory + "/test.jpg"
+	event := Event{Events: []EventDescription{{FullName: fullPath, ShortName: fullPath}}}
+
+	eventWithSpecialPaths := event.ImagesRelativeTo(s.directory)
+
+  c.Assert(eventWithSpecialPaths.Events[0].FullName, Equals, fullPath)
+  c.Assert(eventWithSpecialPaths.Events[0].ShortName, Equals, fullPath)
+
+}
