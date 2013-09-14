@@ -3,7 +3,7 @@ package app
 import (
   "github.com/robfig/revel"
 	"github.com/robfig/revel/modules/jobs/app/jobs"
-	photoJobs "github.com/paytonrules/photoweb/app/jobs"
+	photoJobs "github.com/paytonrules/photolibrary/website/app/jobs"
 )
 
 func init() {

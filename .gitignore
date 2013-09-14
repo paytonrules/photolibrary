@@ -1,6 +1,6 @@
 website/test-results/
-website/tmp/
-website/routes/
+website/app/tmp/
+website/app/routes/
 website/public/events
 .DS_Store
 
