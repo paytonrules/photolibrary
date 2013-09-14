@@ -2,3 +2,4 @@ test-results/
 tmp/
 routes/
 public/events
+.DS_Store
