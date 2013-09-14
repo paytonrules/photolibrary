@@ -1,4 +1,4 @@
-package photolibrary
+package library
 
 type Image interface {
 	GetThumbnail() string

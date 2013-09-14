@@ -1,4 +1,4 @@
-package photolibrary
+package library
 
 import (
 	"os"
