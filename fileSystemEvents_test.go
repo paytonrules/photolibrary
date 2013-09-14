@@ -86,7 +86,7 @@ func (s *FileSystemEventsSuite) TestMakingAPathToEachThumbnail(c *C) {
 	c.Assert(event.Images[0].GetThumbnail(), Equals, s.directory+"/.thumbnails/silly.jpg")
 }
 
-func (s *FileSystemEventsSuite) TestExcludingUnsupporetedFiles(c *C) {
+func (s *FileSystemEventsSuite) TestExcludingUnsupportedFiles(c *C) {
 	s.directory = c.MkDir()
 	file, err := os.Create(s.directory + "/silly.mov")
 	c.Assert(err, IsNil)
@@ -96,5 +96,29 @@ func (s *FileSystemEventsSuite) TestExcludingUnsupporetedFiles(c *C) {
 	event, err := events.Find(s.directory)
 
   c.Assert(event.Images, HasLen, 0)
+}
+
+func (s *FileSystemEventsSuite) TestExcludingUnsupportedFilesIsCaseInsensitive(c *C) {
+	s.directory = c.MkDir()
+	file, err := os.Create(s.directory + "/silly.JPG")
+	c.Assert(err, IsNil)
+	defer file.Close()
+
+	events := MakeFileSystemEvents([]string{".jpg"})
+	event, err := events.Find(s.directory)
+
+	c.Assert(event.Images[0].GetThumbnail(), Equals, s.directory+"/.thumbnails/silly.JPG")
+}
+
+func (s *FileSystemEventsSuite) TestExcludingUnsupportedFilesIsCaseInsensitiveOnExtension(c *C) {
+	s.directory = c.MkDir()
+	file, err := os.Create(s.directory + "/silly.jpg")
+	c.Assert(err, IsNil)
+	defer file.Close()
+
+	events := MakeFileSystemEvents([]string{".JPG"})
+	event, err := events.Find(s.directory)
+
+	c.Assert(event.Images[0].GetThumbnail(), Equals, s.directory+"/.thumbnails/silly.jpg")
 }
 

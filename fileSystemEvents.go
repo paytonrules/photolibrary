@@ -3,18 +3,19 @@ package photolibrary
 import (
 	"os"
 	"path/filepath"
+	"strings"
 )
 
 type FileSystemEvents struct {
-  supportedFiles map[string]bool
+	supportedFiles map[string]bool
 }
 
 func MakeFileSystemEvents(SupportedFiles []string) FileSystemEvents {
-  events := FileSystemEvents{supportedFiles:map[string]bool {}}
-  for _, supportedFileExt := range SupportedFiles {
-    events.supportedFiles[supportedFileExt] = true
-  }
-  return events
+	events := FileSystemEvents{supportedFiles: map[string]bool{}}
+	for _, supportedFileExt := range SupportedFiles {
+		events.supportedFiles[strings.ToLower(supportedFileExt)] = true
+	}
+	return events
 }
 
 func filterOutHiddenFiles(glob []string) []string {
@@ -31,7 +32,7 @@ func filterOutHiddenFiles(glob []string) []string {
 func (evts FileSystemEvents) filterOutUnsupportedFiles(glob []string) []string {
 	filenames := []string{}
 	for _, filename := range glob {
-		if evts.supportedFiles[filepath.Ext(filename)] {
+		if evts.supportedFiles[strings.ToLower(filepath.Ext(filename))] {
 			filenames = append(filenames, filename)
 		}
 	}
@@ -61,7 +62,7 @@ func (events FileSystemEvents) Find(directoryName string) (Event, error) {
 	}
 	fileNames = filterOutHiddenFiles(fileNames)
 	fileNames, directories := separateOutDirectories(fileNames)
-  fileNames = events.filterOutUnsupportedFiles(fileNames)
+	fileNames = events.filterOutUnsupportedFiles(fileNames)
 
 	images := make([]Image, 0, len(fileNames))
 	for _, file := range fileNames {
