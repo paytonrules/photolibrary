@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/paytonrules/photolibrary/library"
-	"github.com/paytonrules/thumbnailRequest"
+	"github.com/paytonrules/photolibrary/thumbnailRequest"
 	"net/http"
 	"time"
 )
