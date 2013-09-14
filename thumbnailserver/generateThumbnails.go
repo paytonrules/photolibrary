@@ -3,14 +3,14 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/paytonrules/photolibrary"
+	"github.com/paytonrules/photolibrary/library"
 	"github.com/paytonrules/thumbnailRequest"
 	"net/http"
 	"time"
 )
 
 type GenerateThumbnailsCommand struct {
-	Events    photolibrary.Events
+	Events    library.Events
 	startTime time.Time
 	duration  time.Duration
 }

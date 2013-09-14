@@ -2,7 +2,7 @@ package main
 
 import (
 	"github.com/gorilla/mux"
-	"github.com/paytonrules/photolibrary"
+	"github.com/paytonrules/photolibrary/library"
 	"html/template"
 	"net/http"
 	"strconv"
@@ -13,14 +13,14 @@ var index = template.Must(template.ParseFiles(
 ))
 
 func GenerateThumbnailsPost(w http.ResponseWriter, r *http.Request) {
-	obj := GenerateThumbnailsCommand{Events: photolibrary.FileSystemEvents{}}
+	obj := GenerateThumbnailsCommand{Events: library.FileSystemEvents{}}
 
 	duration, _ := strconv.Atoi(r.FormValue("duration"))
 	obj.generateThumbnailsForDirectoryAndDuration(r.FormValue("directory"), duration)
 }
 
 func GenerateThumbnails(w http.ResponseWriter, r *http.Request) {
-	obj := GenerateThumbnailsCommand{Events: photolibrary.FileSystemEvents{}}
+	obj := GenerateThumbnailsCommand{Events: library.FileSystemEvents{}}
 
 	obj.Execute(r)
 }

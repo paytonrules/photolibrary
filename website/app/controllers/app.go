@@ -1,7 +1,7 @@
 package controllers
 
 import (
-  "github.com/paytonrules/photolibrary"
+  "github.com/paytonrules/photolibrary/library"
 	"github.com/robfig/revel"
 )
 
@@ -14,7 +14,7 @@ func (c App) renderDirectory(directory string) revel.Result {
   if !found {
     return c.RenderText("Could not find image url")
   }
-	events := photolibrary.MakeFileSystemEvents([]string{".jpg", ".png", ".mov", ".avi"})
+	events := library.MakeFileSystemEvents([]string{".jpg", ".png", ".mov", ".avi"})
 	event, err := events.Find(directory)
 
   rootDir, _ := revel.Config.String("root_dir")

@@ -3,7 +3,7 @@ package main
 import (
 	"bytes"
 	"encoding/json"
-	"github.com/paytonrules/photolibrary"
+	"github.com/paytonrules/photolibrary/library"
 	"github.com/paytonrules/thumbnailRequest"
 	. "launchpad.net/gocheck"
 	"net/http"
@@ -19,21 +19,21 @@ var _ = Suite(&GenerateThumbnailsSuite{})
 type PhonyEvents struct {
 	FullPaths   bool
 	FindString  string
-	FindResults map[string]photolibrary.Event
+	FindResults map[string]library.Event
 }
 
-func (evts *PhonyEvents) Find(eventName string) (photolibrary.Event, error) {
+func (evts *PhonyEvents) Find(eventName string) (library.Event, error) {
 	evts.FindString = eventName
 	if evts.FindResults != nil {
 		return evts.FindResults[eventName], nil
 	} else {
-		return photolibrary.Event{}, nil
+		return library.Event{}, nil
 	}
 }
 
-func (evts *PhonyEvents) FindResultFor(eventName string, evt photolibrary.Event) {
+func (evts *PhonyEvents) FindResultFor(eventName string, evt library.Event) {
 	if evts.FindResults == nil {
-		evts.FindResults = make(map[string]photolibrary.Event)
+		evts.FindResults = make(map[string]library.Event)
 	}
 	evts.FindResults[eventName] = evt
 }
@@ -56,7 +56,7 @@ func (img PhonyImage) GetThumbnail() string {
 	return img.Thumbnail
 }
 
-func (img PhonyImage) Clone() photolibrary.Image {
+func (img PhonyImage) Clone() library.Image {
 	return nil
 }
 
@@ -81,7 +81,7 @@ func (s *GenerateThumbnailsSuite) TestExecuteFindsTheEventsWithTheRightRoot(c *C
 func (s *GenerateThumbnailsSuite) TestGeneratesThumbnailImages(c *C) {
 	phonyEvents := PhonyEvents{}
 	image := &PhonyImage{}
-	phonyEvents.FindResultFor("directory", photolibrary.Event{Images: []photolibrary.Image{image}})
+	phonyEvents.FindResultFor("directory", library.Event{Images: []library.Image{image}})
 	command := GenerateThumbnailsCommand{Events: &phonyEvents}
 
 	req := s.marshalThumbnailRequest("directory", 200)
@@ -92,10 +92,10 @@ func (s *GenerateThumbnailsSuite) TestGeneratesThumbnailImages(c *C) {
 
 func (s *GenerateThumbnailsSuite) TestGeneratesThumnailImagesForChildEvents(c *C) {
 	phonyEvents := PhonyEvents{}
-	eventDescription := photolibrary.EventDescription{FullName: "full name"}
-	rootEvent := photolibrary.Event{Events: []photolibrary.EventDescription{eventDescription}}
+	eventDescription := library.EventDescription{FullName: "full name"}
+	rootEvent := library.Event{Events: []library.EventDescription{eventDescription}}
 	childImage := &PhonyImage{}
-	childEvent := photolibrary.Event{Images: []photolibrary.Image{childImage}}
+	childEvent := library.Event{Images: []library.Image{childImage}}
 
 	phonyEvents.FindResultFor("Root", rootEvent)
 	phonyEvents.FindResultFor("full name", childEvent)
@@ -110,7 +110,7 @@ func (s *GenerateThumbnailsSuite) TestGeneratesThumnailImagesForChildEvents(c *C
 func (s *GenerateThumbnailsSuite) TestDoesntGenerateThumbnailsAfterDuration(c *C) {
 	phonyEvents := PhonyEvents{}
 	image := &PhonyImage{}
-	phonyEvents.FindResultFor("directory", photolibrary.Event{Images: []photolibrary.Image{image}})
+	phonyEvents.FindResultFor("directory", library.Event{Images: []library.Image{image}})
 	command := GenerateThumbnailsCommand{Events: &phonyEvents}
 
 	req := s.marshalThumbnailRequest("directory", 0)
@@ -121,10 +121,10 @@ func (s *GenerateThumbnailsSuite) TestDoesntGenerateThumbnailsAfterDuration(c *C
 
 func (s *GenerateThumbnailsSuite) TestItDoesntContinueDownTheEventTreePastTheDuration(c *C) {
 	phonyEvents := PhonyEvents{}
-	eventDescription := photolibrary.EventDescription{FullName: "full name"}
-	rootEvent := photolibrary.Event{Events: []photolibrary.EventDescription{eventDescription}}
+	eventDescription := library.EventDescription{FullName: "full name"}
+	rootEvent := library.Event{Events: []library.EventDescription{eventDescription}}
 	childImage := &PhonyImage{}
-	childEvent := photolibrary.Event{Images: []photolibrary.Image{childImage}}
+	childEvent := library.Event{Images: []library.Image{childImage}}
 
 	phonyEvents.FindResultFor("Root", rootEvent)
 	phonyEvents.FindResultFor("full name", childEvent)
