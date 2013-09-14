@@ -3,7 +3,7 @@ package jobs
 import (
 	"bytes"
 	"encoding/json"
-	"github.com/paytonrules/photolibrary/thumbnailrequest"
+	thumbnailrequest "github.com/paytonrules/photolibrary/thumbnailrequest"
 	"net/http"
 )
 
