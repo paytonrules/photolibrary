@@ -7,8 +7,11 @@ import (
 	"github.com/paytonrules/photolibrary/thumbnailrequest"
 	. "launchpad.net/gocheck"
 	"net/http"
-	"testing"
 )
+
+type GenerateThumbnailsSuite struct{}
+
+var _ = Suite(&GenerateThumbnailsSuite{})
 
 type TestLogger struct {
   info []string
@@ -21,12 +24,6 @@ func (l *TestLogger) Info(message string) {
 
   l.info = append(l.info, message)
 }
-
-func Test(t *testing.T) { TestingT(t) }
-
-type GenerateThumbnailsSuite struct{}
-
-var _ = Suite(&GenerateThumbnailsSuite{})
 
 type PhonyEvents struct {
 	FullPaths   bool
