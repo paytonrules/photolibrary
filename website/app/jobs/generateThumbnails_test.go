@@ -2,7 +2,7 @@ package jobs
 
 import (
 	"encoding/json"
-	"github.com/paytonrules/thumbnailRequest"
+	"github.com/paytonrules/photolibrary/thumbnailrequest"
 	. "launchpad.net/gocheck"
 	"net/http"
 	"net/http/httptest"
@@ -52,7 +52,7 @@ func (s *GenerateThumbnailsSuite) TestSendsJsonContentType(c *C) {
 }
 
 func (s *GenerateThumbnailsSuite) TestSendsJsonOfDirectoryAndDuration(c *C) {
-	var req thumbnailRequest.Request
+	var req thumbnailrequest.Request
 	var err interface{}
 
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {

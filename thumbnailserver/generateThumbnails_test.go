@@ -61,7 +61,7 @@ func (img PhonyImage) Clone() library.Image {
 }
 
 func (s *GenerateThumbnailsSuite) marshalThumbnailRequest(directory string, duration int) *http.Request {
-	thumbnailRequest := thumbnailRequest.Request{Directory: directory, Duration: duration}
+	thumbnailRequest := thumbnailrequest.Request{Directory: directory, Duration: duration}
 	marshaledThumbnailRequest, _ := json.Marshal(thumbnailRequest)
 	body := bytes.NewBuffer(marshaledThumbnailRequest)
 	req, _ := http.NewRequest("dont", "care", body)
