@@ -10,6 +10,18 @@ import (
 	"testing"
 )
 
+type TestLogger struct {
+  info []string
+}
+
+func (l *TestLogger) Info(message string) {
+  if l.info == nil {
+    l.info = []string{}
+  }
+
+  l.info = append(l.info, message)
+}
+
 func Test(t *testing.T) { TestingT(t) }
 
 type GenerateThumbnailsSuite struct{}
@@ -70,7 +82,7 @@ func (s *GenerateThumbnailsSuite) marshalThumbnailRequest(directory string, dura
 
 func (s *GenerateThumbnailsSuite) TestExecuteFindsTheEventsWithTheRightRoot(c *C) {
 	phonyEvent := PhonyEvents{}
-	command := GenerateThumbnailsCommand{Events: &phonyEvent}
+	command := MakeGenerateThumbnailCommand(&phonyEvent)
 
 	req := s.marshalThumbnailRequest("directory", 0)
 	command.Execute(req)
@@ -82,7 +94,7 @@ func (s *GenerateThumbnailsSuite) TestGeneratesThumbnailImages(c *C) {
 	phonyEvents := PhonyEvents{}
 	image := &PhonyImage{}
 	phonyEvents.FindResultFor("directory", library.Event{Images: []library.Image{image}})
-	command := GenerateThumbnailsCommand{Events: &phonyEvents}
+	command := MakeGenerateThumbnailCommand(&phonyEvents)
 
 	req := s.marshalThumbnailRequest("directory", 200)
 	command.Execute(req)
@@ -100,7 +112,7 @@ func (s *GenerateThumbnailsSuite) TestGeneratesThumnailImagesForChildEvents(c *C
 	phonyEvents.FindResultFor("Root", rootEvent)
 	phonyEvents.FindResultFor("full name", childEvent)
 
-	command := GenerateThumbnailsCommand{Events: &phonyEvents}
+	command := MakeGenerateThumbnailCommand(&phonyEvents)
 	req := s.marshalThumbnailRequest("Root", 200)
 	command.Execute(req)
 
@@ -111,7 +123,7 @@ func (s *GenerateThumbnailsSuite) TestDoesntGenerateThumbnailsAfterDuration(c *C
 	phonyEvents := PhonyEvents{}
 	image := &PhonyImage{}
 	phonyEvents.FindResultFor("directory", library.Event{Images: []library.Image{image}})
-	command := GenerateThumbnailsCommand{Events: &phonyEvents}
+	command := MakeGenerateThumbnailCommand(&phonyEvents)
 
 	req := s.marshalThumbnailRequest("directory", 0)
 	command.Execute(req)
@@ -129,9 +141,19 @@ func (s *GenerateThumbnailsSuite) TestItDoesntContinueDownTheEventTreePastTheDur
 	phonyEvents.FindResultFor("Root", rootEvent)
 	phonyEvents.FindResultFor("full name", childEvent)
 
-	command := GenerateThumbnailsCommand{Events: &phonyEvents}
+	command := MakeGenerateThumbnailCommand(&phonyEvents)
 	req := s.marshalThumbnailRequest("Root", 0)
 	command.Execute(req)
 
 	c.Assert(childImage.Generated, Equals, false)
+}
+
+func (s *GenerateThumbnailsSuite) TestLoggingEvents(c *C) {
+  logger := new(TestLogger)
+	phonyEvents := &PhonyEvents{}
+  generator := MakeGenerateThumbnailCommandWithLogger(phonyEvents, logger)
+
+  generator.generateThumbnailsForDirectory("Root")
+
+  c.Assert(logger.info[0], Equals, "Generating Images in Root")
 }

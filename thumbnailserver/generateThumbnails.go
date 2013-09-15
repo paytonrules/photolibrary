@@ -9,13 +9,21 @@ import (
 	"time"
 )
 
+type NullLogger struct {
+}
+
+func (l *NullLogger) Info(message string) {
+}
+
 type GenerateThumbnailsCommand struct {
 	Events    library.Events
 	startTime time.Time
 	duration  time.Duration
+  logger    Logger
 }
 
 func (c *GenerateThumbnailsCommand) generateThumbnailsForDirectory(directory string) {
+  c.logger.Info("Generating Images in " + directory)
 	event, _ := c.Events.Find(directory)
 
 	for _, img := range event.Images {
@@ -43,4 +51,15 @@ func (c *GenerateThumbnailsCommand) Execute(r *http.Request) {
 	decoder.Decode(&request)
 
 	c.generateThumbnailsForDirectoryAndDuration(request.Directory, request.Duration)
+}
+
+func MakeGenerateThumbnailCommand(events library.Events) *GenerateThumbnailsCommand {
+  nullLogger := new(NullLogger)
+  return MakeGenerateThumbnailCommandWithLogger(events, nullLogger)
+}
+
+func MakeGenerateThumbnailCommandWithLogger(events library.Events, logger Logger) *GenerateThumbnailsCommand {
+  g := GenerateThumbnailsCommand{Events: events, logger: logger}
+
+  return &g
 }
