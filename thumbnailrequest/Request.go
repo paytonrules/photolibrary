@@ -1,4 +1,4 @@
-package thumbnailRequest
+package thumbnailrequest
 
 type Request struct {
   Directory string
