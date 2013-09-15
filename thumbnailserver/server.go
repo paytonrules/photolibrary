@@ -13,14 +13,14 @@ var index = template.Must(template.ParseFiles(
 ))
 
 func GenerateThumbnailsPost(w http.ResponseWriter, r *http.Request) {
-	obj := GenerateThumbnailsCommand{Events: library.FileSystemEvents{}}
+	obj := GenerateThumbnailsCommand{Events: library.MakeFileSystemEvents([]string{".jpg", ".png"})}
 
 	duration, _ := strconv.Atoi(r.FormValue("duration"))
 	obj.generateThumbnailsForDirectoryAndDuration(r.FormValue("directory"), duration)
 }
 
 func GenerateThumbnails(w http.ResponseWriter, r *http.Request) {
-	obj := GenerateThumbnailsCommand{Events: library.FileSystemEvents{}}
+	obj := GenerateThumbnailsCommand{Events: library.MakeFileSystemEvents([]string{".jpg", ".png"})}
 
 	obj.Execute(r)
 }
