@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"github.com/paytonrules/photolibrary/library"
-	"github.com/paytonrules/thumbnailRequest"
+	"github.com/paytonrules/photolibrary/thumbnailrequest"
 	. "launchpad.net/gocheck"
 	"net/http"
 	"testing"
