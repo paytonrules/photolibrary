@@ -1,17 +1,20 @@
 package app
 
 import (
-  "github.com/robfig/revel"
-	"github.com/robfig/revel/modules/jobs/app/jobs"
 	photoJobs "github.com/paytonrules/photolibrary/website/app/jobs"
+	"github.com/robfig/revel"
+	"github.com/robfig/revel/modules/jobs/app/jobs"
 )
 
 func init() {
-  revel.OnAppStart(func() {
-    // Fix don't run on weekends
-    thumbnailServerUrl, _ := revel.Config.String("thumbnail_server")
-    jobs.Schedule("@midnight", photoJobs.GenerateThumbnails{Server: thumbnailServerUrl, Duration: 360})
-  })
+	revel.OnAppStart(func() {
+		// Fix don't run on weekends
+		thumbnailServerUrl, _ := revel.Config.String("thumbnail_server")
+		directory, _ := revel.Config.String("root_dir")
+		jobs.Schedule("@midnight", photoJobs.GenerateThumbnails{Server: thumbnailServerUrl,
+			Directory: directory,
+			Duration:  10800})
+	})
 
 	// Filters is the default set of global filters.
 	revel.Filters = []revel.Filter{
