@@ -16,6 +16,8 @@ var index = template.Must(template.ParseFiles(
 
 func GenerateThumbnailsPost(w http.ResponseWriter, r *http.Request) {
 	logger := new(GoLogger)
+	requestBody, _ := ioutil.ReadAll(r.Body)
+  requestAsString := fmt.Sprintf("Request body %s", requestBody)
 	logger.Info("Recieved Generate Thumbnails Request as Post" + requestAsString)
 	obj := MakeGenerateThumbnailCommandWithLogger(library.MakeFileSystemEvents([]string{".jpg", ".png"}),
 		new(GoLogger))
