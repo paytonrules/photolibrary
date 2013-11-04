@@ -1,9 +1,11 @@
 package main
 
 import (
+	"fmt"
 	"github.com/gorilla/mux"
 	"github.com/paytonrules/photolibrary/library"
 	"html/template"
+	"io/ioutil"
 	"net/http"
 	"strconv"
 )
@@ -21,6 +23,10 @@ func GenerateThumbnailsPost(w http.ResponseWriter, r *http.Request) {
 }
 
 func GenerateThumbnails(w http.ResponseWriter, r *http.Request) {
+	logger := new(GoLogger)
+	requestBody, _ := ioutil.ReadAll(r.Body)
+  requestAsString := fmt.Sprintf("Request body %s", requestBody)
+	logger.Info("Recieved Generate Thumbnails Request " + requestAsString)
 	obj := MakeGenerateThumbnailCommandWithLogger(library.MakeFileSystemEvents([]string{".jpg", ".png"}),
 		new(GoLogger))
 
