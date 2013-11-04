@@ -47,7 +47,7 @@ func (c *GenerateThumbnailsCommand) generateThumbnailsForDirectoryAndDuration(di
 
 func (c *GenerateThumbnailsCommand) Execute(r *http.Request) {
 	decoder := json.NewDecoder(r.Body)
-	var request thumbnailrequest.Request
+	var request = thumbnailrequest.Request
 	decoder.Decode(&request)
 
 	c.generateThumbnailsForDirectoryAndDuration(request.Directory, request.Duration)
