@@ -11,6 +11,7 @@ func init() {
 		// Fix don't run on weekends
 		thumbnailServerUrl, _ := revel.Config.String("thumbnail_server")
 		directory, _ := revel.Config.String("root_dir")
+    revel.ERROR.Printf("The directory is %s", directory)
 		jobs.Schedule("@midnight", photoJobs.GenerateThumbnails{Server: thumbnailServerUrl,
 			Directory: directory,
 			Duration:  10800})
