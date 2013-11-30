@@ -19,6 +19,7 @@ func GenerateThumbnailsPost(w http.ResponseWriter, r *http.Request) {
 	requestBody, _ := ioutil.ReadAll(r.Body)
   requestAsString := fmt.Sprintf("Request body %s", requestBody)
 	logger.Info("Recieved Generate Thumbnails Request as Post" + requestAsString)
+  logger.Info("FormValue for directory is: " + r.FormValue("directory"))
 	obj := MakeGenerateThumbnailCommandWithLogger(library.MakeFileSystemEvents([]string{".jpg", ".png"}),
 		new(GoLogger))
 

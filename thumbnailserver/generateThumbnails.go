@@ -40,6 +40,7 @@ func (c *GenerateThumbnailsCommand) generateThumbnailsForDirectory(directory str
 }
 
 func (c *GenerateThumbnailsCommand) generateThumbnailsForDirectoryAndDuration(directory string, duration int) {
+  c.logger.Info("Try generating Images in " + directory)
 	c.startTime = time.Now()
 	c.duration, _ = time.ParseDuration(fmt.Sprintf("%ds", duration))
 	c.generateThumbnailsForDirectory(directory)
