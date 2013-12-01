@@ -1,12 +1,8 @@
 package main
 
 import (
-	"bytes"
-	"encoding/json"
 	"github.com/paytonrules/photolibrary/library"
-	"github.com/paytonrules/photolibrary/thumbnailrequest"
 	. "launchpad.net/gocheck"
-	"net/http"
 )
 
 type GenerateThumbnailsSuite struct{}
@@ -69,20 +65,12 @@ func (img PhonyImage) Clone() library.Image {
 	return nil
 }
 
-func (s *GenerateThumbnailsSuite) marshalThumbnailRequest(directory string, duration int) *http.Request {
-	thumbnailRequest := thumbnailrequest.Request{Directory: directory, Duration: duration}
-	marshaledThumbnailRequest, _ := json.Marshal(thumbnailRequest)
-	body := bytes.NewBuffer(marshaledThumbnailRequest)
-	req, _ := http.NewRequest("dont", "care", body)
-	return req
-}
 
 func (s *GenerateThumbnailsSuite) TestExecuteFindsTheEventsWithTheRightRoot(c *C) {
 	phonyEvent := PhonyEvents{}
 	command := MakeGenerateThumbnailCommand(&phonyEvent)
 
-	req := s.marshalThumbnailRequest("directory", 0)
-	command.Execute(req)
+  command.generateThumbnailsForDirectory("directory")
 
 	c.Assert(phonyEvent.FindString, Equals, "directory")
 }
@@ -93,8 +81,7 @@ func (s *GenerateThumbnailsSuite) TestGeneratesThumbnailImages(c *C) {
 	phonyEvents.FindResultFor("directory", library.Event{Images: []library.Image{image}})
 	command := MakeGenerateThumbnailCommand(&phonyEvents)
 
-	req := s.marshalThumbnailRequest("directory", 200)
-	command.Execute(req)
+	command.generateThumbnailsForDirectoryAndDuration("directory", 200)
 
 	c.Assert(image.Generated, Equals, true)
 }
@@ -110,8 +97,7 @@ func (s *GenerateThumbnailsSuite) TestGeneratesThumnailImagesForChildEvents(c *C
 	phonyEvents.FindResultFor("full name", childEvent)
 
 	command := MakeGenerateThumbnailCommand(&phonyEvents)
-	req := s.marshalThumbnailRequest("Root", 200)
-	command.Execute(req)
+	command.generateThumbnailsForDirectoryAndDuration("Root", 200)
 
 	c.Assert(childImage.Generated, Equals, true)
 }
@@ -122,8 +108,7 @@ func (s *GenerateThumbnailsSuite) TestDoesntGenerateThumbnailsAfterDuration(c *C
 	phonyEvents.FindResultFor("directory", library.Event{Images: []library.Image{image}})
 	command := MakeGenerateThumbnailCommand(&phonyEvents)
 
-	req := s.marshalThumbnailRequest("directory", 0)
-	command.Execute(req)
+	command.generateThumbnailsForDirectory("directory")
 
 	c.Assert(image.Generated, Equals, false)
 }
@@ -139,8 +124,7 @@ func (s *GenerateThumbnailsSuite) TestItDoesntContinueDownTheEventTreePastTheDur
 	phonyEvents.FindResultFor("full name", childEvent)
 
 	command := MakeGenerateThumbnailCommand(&phonyEvents)
-	req := s.marshalThumbnailRequest("Root", 0)
-	command.Execute(req)
+	command.generateThumbnailsForDirectory("Root")
 
 	c.Assert(childImage.Generated, Equals, false)
 }

@@ -1,11 +1,8 @@
 package main
 
 import (
-	"encoding/json"
 	"fmt"
 	"github.com/paytonrules/photolibrary/library"
-	"github.com/paytonrules/photolibrary/thumbnailrequest"
-	"net/http"
 	"time"
 )
 
@@ -44,14 +41,6 @@ func (c *GenerateThumbnailsCommand) generateThumbnailsForDirectoryAndDuration(di
 	c.startTime = time.Now()
 	c.duration, _ = time.ParseDuration(fmt.Sprintf("%ds", duration))
 	c.generateThumbnailsForDirectory(directory)
-}
-
-func (c *GenerateThumbnailsCommand) Execute(r *http.Request) {
-	decoder := json.NewDecoder(r.Body)
-	var request thumbnailrequest.Request
-	decoder.Decode(&request)
-
-	c.generateThumbnailsForDirectoryAndDuration(request.Directory, request.Duration)
 }
 
 func MakeGenerateThumbnailCommand(events library.Events) *GenerateThumbnailsCommand {
