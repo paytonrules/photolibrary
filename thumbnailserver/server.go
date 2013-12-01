@@ -1,11 +1,11 @@
 package main
 
 import (
-	"fmt"
+	"encoding/json"
 	"github.com/gorilla/mux"
 	"github.com/paytonrules/photolibrary/library"
+	"github.com/paytonrules/photolibrary/thumbnailrequest"
 	"html/template"
-	"io/ioutil"
 	"net/http"
 	"strconv"
 )
@@ -28,20 +28,18 @@ func GenerateThumbnailsPost(w http.ResponseWriter, r *http.Request) {
   r.ParseForm()
   requestBody := r.FormValue("directory")
 	duration, _ := strconv.Atoi(r.FormValue("duration"))
-	
+
   obj := makeCommand()
 	obj.generateThumbnailsForDirectoryAndDuration(requestBody, duration)
 }
 
 func GenerateThumbnails(w http.ResponseWriter, r *http.Request) {
-	logger := new(GoLogger)
-	requestBody, _ := ioutil.ReadAll(r.Body)
-  requestAsString := fmt.Sprintf("Request body %s", requestBody)
-	logger.Info("Recieved Generate Thumbnails Request " + requestAsString)
-	obj := MakeGenerateThumbnailCommandWithLogger(library.MakeFileSystemEvents([]string{".jpg", ".png"}),
-		new(GoLogger))
+	decoder := json.NewDecoder(r.Body)
+	var request thumbnailrequest.Request
+  decoder.Decode(&request)
 
-	obj.Execute(r)
+  obj := makeCommand()
+  obj.generateThumbnailsForDirectoryAndDuration(request.Directory, request.Duration)
 }
 
 func RenderTestPage(w http.ResponseWriter, r *http.Request) {

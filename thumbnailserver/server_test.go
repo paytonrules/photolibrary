@@ -2,6 +2,7 @@ package main
 
 import (
   "net/http"
+  "strings"
   . "launchpad.net/gocheck"
 )
 
@@ -40,5 +41,20 @@ func (s *ServerSuite) TestWeHandleSpacesOnDirectory(c *C) {
   GenerateThumbnailsPost(nil, r)
 
   c.Assert(s.directory, Equals, "The Body")
+  c.Assert(s.duration, Equals, 300)
+}
+
+func (s *ServerSuite) TestCreateThumbnailsFromJSON(c * C) {
+  r, _ := http.NewRequest("POST",
+                          "http://a.com",
+                          strings.NewReader("{\"directory\": \"TheBody\", \"duration\": 300}"))
+
+  makeCommand = func() ThumbnailGenerator {
+    return s
+  }
+
+  GenerateThumbnails(nil, r)
+
+  c.Assert(s.directory, Equals, "TheBody")
   c.Assert(s.duration, Equals, 300)
 }
