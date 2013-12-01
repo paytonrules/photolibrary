@@ -14,17 +14,23 @@ var index = template.Must(template.ParseFiles(
 	"templates/index.html",
 ))
 
-func GenerateThumbnailsPost(w http.ResponseWriter, r *http.Request) {
-	logger := new(GoLogger)
-	requestBody, _ := ioutil.ReadAll(r.Body)
-  requestAsString := fmt.Sprintf("Request body %s", requestBody)
-	logger.Info("Recieved Generate Thumbnails Request as Post" + requestAsString)
-  logger.Info("FormValue for directory is: " + r.FormValue("directory"))
-	obj := MakeGenerateThumbnailCommandWithLogger(library.MakeFileSystemEvents([]string{".jpg", ".png"}),
-		new(GoLogger))
+type ThumbnailGenerator interface {
+  generateThumbnailsForDirectoryAndDuration(directory string, duration int)
+}
 
+var makeCommand = func() ThumbnailGenerator {
+	logger := new(GoLogger)
+  return MakeGenerateThumbnailCommandWithLogger(library.MakeFileSystemEvents([]string{".jpg", ".png"}),
+		logger)
+}
+
+func GenerateThumbnailsPost(w http.ResponseWriter, r *http.Request) {
+  r.ParseForm()
+  requestBody := r.FormValue("directory")
 	duration, _ := strconv.Atoi(r.FormValue("duration"))
-	obj.generateThumbnailsForDirectoryAndDuration(r.FormValue("directory"), duration)
+	
+  obj := makeCommand()
+	obj.generateThumbnailsForDirectoryAndDuration(requestBody, duration)
 }
 
 func GenerateThumbnails(w http.ResponseWriter, r *http.Request) {
